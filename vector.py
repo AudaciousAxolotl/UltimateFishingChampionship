@@ -1,4 +1,4 @@
-# ETGG 1803 Lab08 - Rasterizer & Matrix Transofrmations
+# ETGG 1803 Lab08 - Rasterizer & Matrix Transformations
 # Joe McNally
 # Section 02
 # 04/29/18
