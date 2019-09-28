@@ -120,9 +120,9 @@ while not done:
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
 
-    #screen.fill((0, 0, 0))
-
-    #bg.move(20, deltaTime)
+    if deltaTime >= 30.0:
+        screen.fill((0, 0, 0))
+        bg.move(1)
 
     bg.draw(background, screen)
     myBoatman.draw(screen)
