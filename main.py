@@ -159,7 +159,7 @@ while not done:
         screen.blit(title2, (title2X, 250))
     else:
         screen.blit(instructions1, ((1280/2 - (instructions1.get_width()/2)), 150))
-        screen.blit(instructions2, ((1280/2 - (instructions1.get_width()/2)), 250))
+        screen.blit(instructions2, ((1280/2 - (instructions1.get_width()/2)+35), 250))
 
     if runningTime >= 2.0:
         title1X -= 3
@@ -167,7 +167,7 @@ while not done:
             title1X = (1280 / 2 - (title1.get_width() / 2))
         title2X -= 3
         if title2X <= (1280 / 2 - (title2.get_width() / 2)):
-            title2X = (1280 / 2 - (title2.get_width() / 2 + 2))
+            title2X = (1280 / 2 - (title2.get_width() / 2 -1))
 
     pygame.display.flip()
 
