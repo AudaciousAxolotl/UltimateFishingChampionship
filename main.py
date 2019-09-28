@@ -22,7 +22,7 @@ castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
 
 myBoatman = Boatman.Boatman()
-myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_temp.png")
+myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_1.png", "fish_2.png")
 
 joystick_count = pygame.joystick.get_count()
 
@@ -94,6 +94,9 @@ while not done:
 
     if key_pressed[pygame.K_d]:
         leftRightAxis = 0.6
+
+    if key_pressed[pygame.K_c]:
+        myFish.catch(Vector2(myBoatman.mPos.x + myBoatman.mWidth/2, myBoatman.mPos.y + myBoatman.mHeight/2))
 
     if abs(leftRightAxis) < 0.07:
         leftRightAxis = 0
