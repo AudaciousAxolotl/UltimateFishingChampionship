@@ -51,6 +51,11 @@ while not done:
                 done = True
             if evt.key == pygame.K_F6:
                 debugIsOn = not debugIsOn
+        if evt.type == pygame.MOUSEBUTTONDOWN:
+            (mouseL, mouseM, mouseR) = pygame.mouse.get_pressed()
+            (mouse_x, mouse_y) = pygame.mouse.get_pos()
+            if mouseL:
+                myBoatman.cast_at(Vector2(mouse_x, mouse_y))
 
         if evt.type == pygame.JOYBUTTONDOWN:
             if evt.button == 0:
@@ -93,16 +98,16 @@ while not done:
             print("Trigger down!")
 
     if key_pressed[pygame.K_w]:
-        upDownAxis = -0.6
+        upDownAxis = -0.1
 
     if key_pressed[pygame.K_s]:
-        upDownAxis = 0.6
+        upDownAxis = 0.1
 
     if key_pressed[pygame.K_a]:
-        leftRightAxis = -0.6
+        leftRightAxis = -0.1
 
     if key_pressed[pygame.K_d]:
-        leftRightAxis = 0.6
+        leftRightAxis = 0.1
 
     if abs(leftRightAxis) < 0.07:
         leftRightAxis = 0

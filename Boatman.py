@@ -4,6 +4,7 @@ from vector import *
 screen_width = 1280
 screen_height = 720
 
+
 class Boatman:
     def __init__(self, pos=Vector2(0, 0)):
         self.mPos = pos
@@ -12,18 +13,17 @@ class Boatman:
         self.mDrag = Vector2(0,0)
         self.mDragCoefficient = 0.995
         self.mImage = pygame.image.load("img/boatman.png")
-        self.mMoveSpeed = 200
-        self.mMaxSpeed = 300
+        self.mMoveSpeed = 3
+        self.mMaxSpeed = 100
         self.mLineCastStrength = 500
         self.mNextCastTimer = 0
-        self.mCastTime = 2.0
+        self.mCastTime = 20.0
         self.mMaxSpeedSq = self.mMaxSpeed * self.mMaxSpeed
         self.mWidth = self.mImage.get_width()
         self.mHalfWidth = self.mWidth / 2
         self.mHeight = self.mImage.get_height()
         self.mHalfHeight = self.mHeight / 2
         self.mCurrentLineTarget = None
-
 
     def update(self, delta_time):
         if self.mNextCastTimer > 0:
@@ -45,7 +45,6 @@ class Boatman:
             self.mVelocity.y *= -1
         if self.y > screen_height - self.mHeight and self.mVelocity.y > 0:
             self.mVelocity.y *= -1
-
 
     def add_force(self, force_vec2):
         self.mAcceleration += force_vec2
