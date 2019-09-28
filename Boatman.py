@@ -55,6 +55,7 @@ class Boatman:
             pygame.draw.line(screen, (255,255,255), self.mPos+Vector2(self.mHalfWidth, self.mHalfHeight), self.mCurrentLineTarget, 3)
 
     def cast_at(self, direction_vector):
+        print(direction_vector)
         if self.mCurrentLineTarget is None:
             self.mNextCastTimer = self.mCastTime
             self.mCurrentLineTarget = self.mPos+Vector2(self.mHalfWidth, self.mHalfHeight) + (direction_vector * self.mLineCastStrength)

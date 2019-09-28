@@ -39,9 +39,14 @@ if joystick_count > 0:
 
 deltaTime = 0
 
+pygame.font.init()
+stardewFont = pygame.font.Font("font/Stardew_Valley.otf", 100)
+
 #Game Loop in dis bish
 while not done:
     deltaTime += clock.tick() / 1000.0
+    (mouseL, mouseM, mouseR) = pygame.mouse.get_pressed()
+    (mouse_x, mouse_y) = pygame.mouse.get_pos()
 
     for evt in pygame.event.get():
         if evt.type == pygame.QUIT:
@@ -52,8 +57,6 @@ while not done:
             if evt.key == pygame.K_F6:
                 debugIsOn = not debugIsOn
         if evt.type == pygame.MOUSEBUTTONDOWN:
-            (mouseL, mouseM, mouseR) = pygame.mouse.get_pressed()
-            (mouse_x, mouse_y) = pygame.mouse.get_pos()
             if mouseL:
                 myBoatman.cast_at(Vector2(mouse_x, mouse_y))
 
@@ -132,8 +135,12 @@ while not done:
     bg.draw(background, screen)
     myBoatman.draw(screen)
 
+    instructions1 = pygame.font.Font.render(stardewFont, "Left-click to", False, (255, 255, 255))
+    instructions2 = pygame.font.Font.render(stardewFont, "catch fish", False, (255, 255, 255))
+    screen.blit(instructions1, (800, 150))
+    screen.blit(instructions2, (838, 250))
+
     pygame.display.flip()
-    print(deltaTime)
 
 pygame.font.quit()
 pygame.mixer.quit()
