@@ -24,7 +24,11 @@ deadZoneThreshold=0.085
 
 myBoatman = Boatman.Boatman()
 myBoatman.turn_on_movement()
-myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_temp.jpg")
+myFishList = []
+for i in range(20):
+    myFish = FishObjects.Fish(Vector2(random.randint(100, 1180), random.randint(100, 620)),
+                              Vector2(random.randint(-20, 20), random.randint(-20, 20)), "fish_temp.jpg")
+    myFishList.append(myFish)
 
 joystick_count = pygame.joystick.get_count()
 
@@ -49,7 +53,7 @@ while not done:
             if evt.key == pygame.K_F6:
                 debugIsOn = not debugIsOn
 
-        if (evt.type == pygame.MOUSEBUTTONDOWN):sssssssssssssssssssssdsddddddddd
+        if evt.type == pygame.MOUSEBUTTONDOWN:
             if evt.button == 1:
                 if joystick is None:
                     myBoatman.cast_line()
@@ -99,17 +103,22 @@ while not done:
             if debugIsOn:
                 print("Trigger down!")
 
-    if key_pressed[pygame.K_w]:
-        upDownAxis = -0.6
+    if joystick is None:
+        if key_pressed[pygame.K_w]:
+            upDownAxis = -0.6
+        else:
+            if key_pressed[pygame.K_s]:
+                upDownAxis = 0.6
+            else:
+                upDownAxis = 0
 
-    if key_pressed[pygame.K_s]:
-        upDownAxis = 0.6
-
-    if key_pressed[pygame.K_a]:
-        leftRightAxis = -0.6
-
-    if key_pressed[pygame.K_d]:
-        leftRightAxis = 0.6
+        if key_pressed[pygame.K_a]:
+            leftRightAxis = -0.6
+        else:
+            if key_pressed[pygame.K_d]:
+                leftRightAxis = 0.6
+            else:
+                leftRightAxis = 0
 
     if abs(leftRightAxis) < deadZoneThreshold:
         leftRightAxis = 0
@@ -132,15 +141,32 @@ while not done:
 
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
-    myFish.update(deltaTime)
+    for fish in myFishList:
+        fish.update(deltaTime)
 
     if joystick is not None:
         myBoatman.move_target_reticle(castVectorAxis)
 
+    if not myBoatman.mCaughtSomething:
+        for fish in myFishList:
+            if fish.isCaught:
+                fish.die()
+            else:
+                fish.isCaught = myBoatman.checkBobberCollision(fish.colliderCuboid)
+                if fish.isCaught:
+                    break
+    else:
+        for fish in myFishList:
+            if fish.isCaught:
+                fish.pos=myBoatman.mCurrentBobberLocation
+
+    myFishList[:] = [fish for fish in myFishList if not fish.isDead]
+
     screen.blit(background, (0, 0))
 
     myBoatman.draw(screen)
-    myFish.draw(screen)
+    for fish in myFishList:
+        fish.draw(screen)
     pygame.display.flip()
 
 pygame.font.quit()

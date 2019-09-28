@@ -58,12 +58,14 @@ class Cuboid(Shape):
                 return False
         return True
 
-    def drawPygame(self, screen, is_selected, is_colliding):
+    def updatePos(self, pos_vector):
+        self.mPos = pos_vector
         self.mPoints[0] = self.mPos + (self.mSideOneVector.x * self.mXVector) + (self.mSideOneVector.y * self.mYVector)
         self.mPoints[1] = self.mPos + (self.mSideTwoVector.x * self.mXVector) + (self.mSideTwoVector.y * self.mYVector)
         self.mPoints[2] = self.mPos + (self.mSideThreeVector.x * self.mXVector) + (self.mSideThreeVector.y * self.mYVector)
         self.mPoints[3] = self.mPos + (self.mSideFourVector.x * self.mXVector) + (self.mSideFourVector.y * self.mYVector)
 
+    def drawPygame(self, screen, is_selected, is_colliding):
         if is_colliding:
             draw_color = (255,0,0)
         else:

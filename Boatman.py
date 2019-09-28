@@ -1,5 +1,7 @@
 import pygame
 from vector import *
+import object
+
 
 screen_width = 1280
 screen_height = 720
@@ -27,6 +29,7 @@ class Boatman:
         self.mHalfWidth = self.mWidth / 2
         self.mHeight = self.mImage.get_height()
         self.mHalfHeight = self.mHeight / 2
+        self.mBobberSize = 5
         self.mCurrentLineTarget = None
         self.mCurrentBobberLocation = None
         self.mCastLaunchPoint = None
@@ -34,9 +37,11 @@ class Boatman:
         self.mReelingIn = False
         self.mCastingVector = None
         self.mAllowMovement = False
+        self.mCaughtSomething = False
         self.mTargetReticleLocation = Vector2(screen_width/2, screen_height/2)
         self.mTargetReticleSpeed = 15
         self.mTargetReticleSize = 25
+        self.mBobberCollisionSphere = object.Sphere((255,0,0), Vector2(-1000, -1000), self.mBobberSize)
 
     def update(self, delta_time):
         if self.mAllowMovement:
@@ -48,6 +53,8 @@ class Boatman:
                     self.mReelingIn = False
                     self.mCastingOut = False
                     self.mCastLaunchPoint = None
+                    self.mCaughtSomething = False
+                    self.mBobberCollisionSphere.mPos = Vector2(-1000,-1000)
             self.mVelocity += self.mAcceleration * delta_time
             self.mVelocity *= self.mDragCoefficient
             if self.mVelocity.magnitudeSq > self.mMaxSpeedSq:
@@ -81,6 +88,20 @@ class Boatman:
             self.mAcceleration = Vector2(0, 0)
             self.mCurrentLineTarget = None
             self.mCastLaunchPoint = None
+        if self.mCastingOut or self.mReelingIn:
+            self.mBobberCollisionSphere.mPos = self.mCurrentBobberLocation
+
+    def checkBobberCollision(self, cuboid):
+        if not self.mCaughtSomething and object.collides(self.mBobberCollisionSphere, cuboid):
+            self.mCurrentLineTarget = self.mCurrentBobberLocation
+            self.mCaughtSomething = True
+            if self.mCastingOut:
+                self.mNextCastTimer = self.mHalfCastTime
+                self.mCastingOut = False
+                self.mReelingIn = True
+            return True
+        return False
+
 
     def add_force(self, force_vec2):
         if self.mAllowMovement:
@@ -94,6 +115,7 @@ class Boatman:
         pygame.draw.circle(screen, (0, 0, 255), self.mTargetReticleLocation.i, self.mTargetReticleSize, 2)
         pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(0, self.mTargetReticleSize)).i, (self.mTargetReticleLocation - Vector2(0, self.mTargetReticleSize)).i, 2)
         pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(self.mTargetReticleSize, 0)).i, (self.mTargetReticleLocation - Vector2(self.mTargetReticleSize, 0)).i, 2)
+        # self.mBobberCollisionSphere.drawPygame(screen, False, False)
 
     def cast_at(self, target_vector, directly_at_location=False):
         if self.mAllowMovement:
