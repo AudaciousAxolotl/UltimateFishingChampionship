@@ -22,9 +22,14 @@ castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
 
 myBoatman = Boatman.Boatman()
+myBoatman.turn_on_movement()
 myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_1.png", "fish_2.png")
 
 joystick_count = pygame.joystick.get_count()
+
+
+
+
 
 if joystick_count > 0:
     joystick = pygame.joystick.Joystick(0)
