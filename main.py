@@ -37,9 +37,11 @@ if joystick_count > 0:
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
+deltaTime = 0
+
 #Game Loop in dis bish
 while not done:
-    deltaTime = clock.tick() / 1000.0
+    deltaTime += clock.tick() / 1000.0
 
     for evt in pygame.event.get():
         if evt.type == pygame.QUIT:
@@ -126,6 +128,7 @@ while not done:
     myBoatman.draw(screen)
 
     pygame.display.flip()
+    print(deltaTime)
 
 pygame.font.quit()
 pygame.mixer.quit()
