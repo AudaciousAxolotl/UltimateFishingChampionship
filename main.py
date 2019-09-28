@@ -13,8 +13,13 @@ background = pygame.image.load("FISH_Starting_Level.jpg")
 done = False
 debugIsOn = False
 joystick = None
+joystickTriggerDown = False
+joystickTriggerDownEvent = False
+joystickTriggerUpEvent = False
 leftRightAxis = 0
 upDownAxis = 0
+castVectorAxis = Vector2(0, 0)
+triggerAxis = 0
 
 myBoatman = Boatman.Boatman()
 
@@ -61,10 +66,21 @@ while not done:
     if joystick is not None:
         leftRightAxis = joystick.get_axis(0)
         upDownAxis = joystick.get_axis(1)
-
-    print("(", leftRightAxis, ",", upDownAxis, ")")
+        castVectorAxis = Vector2(joystick.get_axis(4), joystick.get_axis(3)).normalized
+        triggerAxis = joystick.get_axis(2)
 
     key_pressed = pygame.key.get_pressed()
+
+    if joystickTriggerDown:
+        if abs(triggerAxis) < 0.5:
+            joystickTriggerDown = False
+            joystickTriggerUpEvent = True
+            print("Trigger up!")
+    else:
+        if abs(triggerAxis) > 0.7:
+            joystickTriggerDown = True
+            joystickTriggerDownEvent = True
+            print("Trigger down!")
 
     if key_pressed[pygame.K_w]:
         upDownAxis = -0.6
@@ -83,6 +99,13 @@ while not done:
 
     if abs(upDownAxis) < 0.07:
         upDownAxis = 0
+
+    if joystickTriggerDownEvent:
+        myBoatman.cast_at(castVectorAxis)
+        joystickTriggerDownEvent = False
+
+    if joystickTriggerUpEvent:
+        joystickTriggerUpEvent = False
 
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
