@@ -12,7 +12,7 @@ class baseObject():
             self.images.append(pygame.image.load(image))
         self.numOfImages = len(self.images)
         self.width = self.images[0].get_width()
-        self.height = self.images[1].get_height()
+        self.height = self.images[0].get_height()
         self.currentImage = 0
         self.isCaught = False
         self.animTimer = 0.2

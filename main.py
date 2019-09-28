@@ -24,7 +24,7 @@ deadZoneThreshold=0.085
 
 myBoatman = Boatman.Boatman()
 myBoatman.turn_on_movement()
-myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_temp.png")
+myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_temp.jpg")
 
 joystick_count = pygame.joystick.get_count()
 
@@ -36,6 +36,10 @@ if joystick_count > 0:
 while not done:
     deltaTime = clock.tick() / 1000.0
 
+    if joystick is None:
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        myBoatman.set_target_reticle(Vector2(mouse_x, mouse_y))
+
     for evt in pygame.event.get():
         if evt.type == pygame.QUIT:
             done = True
@@ -44,6 +48,11 @@ while not done:
                 done = True
             if evt.key == pygame.K_F6:
                 debugIsOn = not debugIsOn
+
+        if (evt.type == pygame.MOUSEBUTTONDOWN):sssssssssssssssssssssdsddddddddd
+            if evt.button == 1:
+                if joystick is None:
+                    myBoatman.cast_line()
 
         if evt.type == pygame.JOYBUTTONDOWN:
             if evt.button == 0:
