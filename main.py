@@ -1,4 +1,4 @@
-import pygame, time, random, Boatman2
+import pygame, time, random, Boatman
 from vector import *
 from bg import *
 
@@ -13,7 +13,7 @@ win_height = 720
 
 screen = pygame.display.set_mode((win_width, win_height))
 
-background = pygame.image.load("FISH_Starting_Level.jpg")
+background = pygame.image.load("Main_Scene.jpg")
 
 done = False
 debugIsOn = False
@@ -27,7 +27,8 @@ upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
 
-myBoatman = Boatman2.Boatman()
+myBoatman = Boatman.Boatman()
+myBoatman.mAllowMovement = True
 
 bg = Background(background, 0, 0)
 
@@ -41,6 +42,8 @@ runningTime = 0
 
 pygame.font.init()
 stardewFont = pygame.font.Font("font/Stardew_Valley.otf", 100)
+title1X = 650
+title2X = 700
 
 #Game Loop in dis bish
 while not done:
@@ -126,12 +129,15 @@ while not done:
     if joystickTriggerUpEvent:
         joystickTriggerUpEvent = False
 
+    screen.fill((0, 0, 0))
+
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
 
-    if deltaTime >= 30.0:
-        screen.fill((0, 0, 0))
-        bg.move(1)
+    if runningTime >= 2.0:
+        bg.move_right(3)
+        if bg.posX < -1280:
+            bg.posX = -1280
 
     bg.draw(background, screen)
     myBoatman.draw(screen)
@@ -141,12 +147,20 @@ while not done:
     instructions1 = pygame.font.Font.render(stardewFont, "Left-click to", True, (255, 255, 255))
     instructions2 = pygame.font.Font.render(stardewFont, "catch fish", True, (255, 255, 255))
 
-    if deltaTime <= 5.0:
-        screen.blit(title1, (650, 150))
-        screen.blit(title2, (700, 250))
+    if runningTime <= 10.0:
+        screen.blit(title1, (title1X, 150))
+        screen.blit(title2, (title2X, 250))
     else:
-        screen.blit(instructions1, (750, 150))
-        screen.blit(instructions2, (788, 250))
+        screen.blit(instructions1, ((1280/2 - (instructions1.get_width()/2)), 150))
+        screen.blit(instructions2, ((1280/2 - (instructions1.get_width()/2)), 250))
+
+    if runningTime >= 2.0:
+        title1X -= 3
+        if title1X <= (1280 / 2 - (title1.get_width() / 2)):
+            title1X = (1280 / 2 - (title1.get_width() / 2))
+        title2X -= 3
+        if title2X <= (1280 / 2 - (title2.get_width() / 2)):
+            title2X = (1280 / 2 - (title2.get_width() / 2 + 2))
 
     pygame.display.flip()
 
