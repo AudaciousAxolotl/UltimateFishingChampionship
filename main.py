@@ -1,27 +1,35 @@
 import pygame, time, random, Boatman
 from vector import *
+from bg import *
 
 pygame.display.init()
 pygame.mixer.init()
 pygame.font.init()
 pygame.joystick.init()
 clock = pygame.time.Clock()
+
 win_width = 1280
 win_height = 720
+
 screen = pygame.display.set_mode((win_width, win_height))
+
 background = pygame.image.load("FISH_Starting_Level.jpg")
+
 done = False
 debugIsOn = False
 joystick = None
 joystickTriggerDown = False
 joystickTriggerDownEvent = False
 joystickTriggerUpEvent = False
+
 leftRightAxis = 0
 upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
 
 myBoatman = Boatman.Boatman()
+
+bg = Background(background, 0, 0)
 
 joystick_count = pygame.joystick.get_count()
 
@@ -109,8 +117,14 @@ while not done:
 
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
-    screen.blit(background, (0, 0))
+
+    #screen.fill((0, 0, 0))
+
+    #bg.move(20, deltaTime)
+
+    bg.draw(background, screen)
     myBoatman.draw(screen)
+
     pygame.display.flip()
 
 pygame.font.quit()
