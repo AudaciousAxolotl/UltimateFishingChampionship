@@ -1,4 +1,4 @@
-import pygame, time, random, Boatman
+import pygame, time, random, Boatman, FishObjects
 from vector import *
 
 pygame.display.init()
@@ -17,6 +17,7 @@ leftRightAxis = 0
 upDownAxis = 0
 
 myBoatman = Boatman.Boatman()
+myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_temp.png")
 
 joystick_count = pygame.joystick.get_count()
 
@@ -86,8 +87,13 @@ while not done:
 
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
+    myFish.update(deltaTime)
+
     screen.blit(background, (0, 0))
+
+
     myBoatman.draw(screen)
+    myFish.draw(screen)
     pygame.display.flip()
 
 pygame.font.quit()
