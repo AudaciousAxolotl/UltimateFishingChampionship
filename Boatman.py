@@ -23,6 +23,9 @@ class Boatman:
         self.mPos += self.mVelocity * delta_time
         if self.x < 0 or self.x > screen_width - self.mWidth:
             self.mVelocity.x *= -1
+        if self.y < 0 or self.y > screen_height - self.mHeight:
+            self.mVelocity.y *= -1
+
 
     def add_force(self, force_vec2):
         self.mAcceleration += force_vec2
