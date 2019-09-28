@@ -1,4 +1,4 @@
-import pygame, time, random, Boatman
+import pygame, time, random, Boatman2
 from vector import *
 from bg import *
 
@@ -27,7 +27,7 @@ upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
 
-myBoatman = Boatman.Boatman()
+myBoatman = Boatman2.Boatman()
 
 bg = Background(background, 0, 0)
 
@@ -37,14 +37,15 @@ if joystick_count > 0:
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
-deltaTime = 0
+runningTime = 0
 
 pygame.font.init()
 stardewFont = pygame.font.Font("font/Stardew_Valley.otf", 100)
 
 #Game Loop in dis bish
 while not done:
-    deltaTime += clock.tick() / 1000.0
+    deltaTime = clock.tick() / 1000.0
+    runningTime += deltaTime
     (mouseL, mouseM, mouseR) = pygame.mouse.get_pressed()
     (mouse_x, mouse_y) = pygame.mouse.get_pos()
 

@@ -4,6 +4,7 @@ from vector import *
 screen_width = 1280
 screen_height = 720
 
+
 class Boatman:
     def __init__(self, pos=Vector2(0, 0)):
         self.mPos = pos
@@ -12,11 +13,11 @@ class Boatman:
         self.mDrag = Vector2(0,0)
         self.mDragCoefficient = 0.995
         self.mImage = pygame.image.load("img/boatman.png")
-        self.mMoveSpeed = 200
-        self.mMaxSpeed = 300
+        self.mMoveSpeed =
+        self.mMaxSpeed = 5
         self.mLineCastStrength = 500
         self.mNextCastTimer = 0
-        self.mCastTime = 3.0
+        self.mCastTime = 20.0
         self.mHalfCastTime = self.mCastTime / 2
         self.mMaxSpeedSq = self.mMaxSpeed * self.mMaxSpeed
         self.mWidth = self.mImage.get_width()
