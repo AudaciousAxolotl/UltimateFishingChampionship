@@ -1,14 +1,15 @@
 import pygame
+# from main import *
 
 
 class Background(object):
-    def __init__(self):
-        self.posX = 0
-        self.posY = 0
-        self.pos = (self.posX, self.posY)
+    def __init__(self, image, posX, posY):
+        self.image = image
+        self.posX = posX
+        self.posY = posY
 
     def draw(self, img, screen):
-        screen.blit(img, img.pos)
+        screen.blit(img, (self.posX, self.posY))
 
-    def move(self, speed, direction):
-        pass
+    def move(self, speed, time):
+        self.posY += speed*time
