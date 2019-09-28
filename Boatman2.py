@@ -30,6 +30,7 @@ class Boatman:
         self.mCastingOut = False
         self.mReelingIn = False
         self.mCastingVector = None
+        self.mAllowMovement = False
 
     def update(self, delta_time):
         if self.mNextCastTimer > 0:
@@ -68,7 +69,8 @@ class Boatman:
 
 
     def add_force(self, force_vec2):
-        self.mAcceleration += force_vec2
+        if self.mAllowMovement:
+            self.mAcceleration += force_vec2
 
     def draw(self, screen):
         screen.blit(self.mImage, (int(self.x), int(self.y)))
@@ -77,17 +79,24 @@ class Boatman:
             pygame.draw.circle(screen, (255, 40, 80), self.mCurrentBobberLocation.i, 5)
 
     def cast_at(self, direction_vector):
-        if self.mCurrentLineTarget is None:
-            self.mNextCastTimer = self.mCastTime
-            self.mCurrentLineTarget = self.fishing_pole_tip + (direction_vector * self.mLineCastStrength)
-            self.mCurrentBobberLocation = self.fishing_pole_tip
-            self.mCastingVector = self.mCurrentLineTarget - self.mCurrentBobberLocation
-            self.mCastLaunchPoint = self.mCurrentBobberLocation
-            self.mCastingOut = True
-            self.mReelingIn = False
+        if self.mAllowMovement:
+            if self.mCurrentLineTarget is None:
+                self.mNextCastTimer = self.mCastTime
+                self.mCurrentLineTarget = self.fishing_pole_tip + (direction_vector * self.mLineCastStrength)
+                self.mCurrentBobberLocation = self.fishing_pole_tip
+                self.mCastingVector = self.mCurrentLineTarget - self.mCurrentBobberLocation
+                self.mCastLaunchPoint = self.mCurrentBobberLocation
+                self.mCastingOut = True
+                self.mReelingIn = False
 
     def cast_to(self, target_pos_vector):
         self.cast_at(target_pos_vector - self.fishing_pole_tip)
+
+    def turn_on_movement(self):
+        self.mAllowMovement = True
+
+    def turn_off_movement(self):
+        self.mAllowMovement = False
 
     @property
     def x(self):
