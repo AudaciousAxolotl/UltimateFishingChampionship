@@ -20,8 +20,10 @@ leftRightAxis = 0
 upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
+deadZoneThreshold=0.085
 
 myBoatman = Boatman.Boatman()
+myBoatman.turn_on_movement()
 myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_temp.png")
 
 joystick_count = pygame.joystick.get_count()
@@ -70,7 +72,7 @@ while not done:
     if joystick is not None:
         leftRightAxis = joystick.get_axis(0)
         upDownAxis = joystick.get_axis(1)
-        castVectorAxis = Vector2(joystick.get_axis(4), joystick.get_axis(3)).normalized
+        castVectorAxis = Vector2(joystick.get_axis(4), joystick.get_axis(3))
         triggerAxis = joystick.get_axis(2)
 
     key_pressed = pygame.key.get_pressed()
@@ -100,14 +102,20 @@ while not done:
     if key_pressed[pygame.K_d]:
         leftRightAxis = 0.6
 
-    if abs(leftRightAxis) < 0.07:
+    if abs(leftRightAxis) < deadZoneThreshold:
         leftRightAxis = 0
 
-    if abs(upDownAxis) < 0.07:
+    if abs(upDownAxis) < deadZoneThreshold:
         upDownAxis = 0
 
+    if abs(castVectorAxis.x) < deadZoneThreshold:
+        castVectorAxis.x = 0
+
+    if abs(castVectorAxis.y) < deadZoneThreshold:
+        castVectorAxis.y = 0
+
     if joystickTriggerDownEvent:
-        myBoatman.cast_at(castVectorAxis)
+        myBoatman.cast_line()
         joystickTriggerDownEvent = False
 
     if joystickTriggerUpEvent:
@@ -116,6 +124,9 @@ while not done:
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
     myFish.update(deltaTime)
+
+    if joystick is not None:
+        myBoatman.move_target_reticle(castVectorAxis)
 
     screen.blit(background, (0, 0))
 
