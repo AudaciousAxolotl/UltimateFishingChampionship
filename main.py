@@ -45,12 +45,15 @@ while not done:
 
         if evt.type == pygame.JOYBUTTONDOWN:
             if evt.button == 0:
-                print("A?")
+                if debugIsOn:
+                    print("A?")
             elif evt.button == 2:
                 """ X Button """
-                print("X!")
+                if debugIsOn:
+                    print("X!")
             elif evt.button == 3:
-                print("Y!")
+                if debugIsOn:
+                    print("Y!")
             elif evt.button == 6:
                 done = True
             elif evt.button == 7:
@@ -76,12 +79,14 @@ while not done:
         if abs(triggerAxis) < 0.5:
             joystickTriggerDown = False
             joystickTriggerUpEvent = True
-            print("Trigger up!")
+            if debugIsOn:
+                print("Trigger up!")
     else:
         if abs(triggerAxis) > 0.7:
             joystickTriggerDown = True
             joystickTriggerDownEvent = True
-            print("Trigger down!")
+            if debugIsOn:
+                print("Trigger down!")
 
     if key_pressed[pygame.K_w]:
         upDownAxis = -0.6
@@ -116,7 +121,6 @@ while not done:
     myFish.update(deltaTime)
 
     screen.blit(background, (0, 0))
-
 
     myBoatman.draw(screen)
     myFish.draw(screen)
