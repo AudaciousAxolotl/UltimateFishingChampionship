@@ -1,4 +1,4 @@
-import pygame, time, random, Boatman
+import pygame, time, random, Boatman, FishObjects
 from vector import *
 from bg import *
 
@@ -7,10 +7,8 @@ pygame.mixer.init()
 pygame.font.init()
 pygame.joystick.init()
 clock = pygame.time.Clock()
-
 win_width = 1280
 win_height = 720
-
 screen = pygame.display.set_mode((win_width, win_height))
 
 background = pygame.image.load("Main_Scene.jpg")
@@ -21,7 +19,6 @@ joystick = None
 joystickTriggerDown = False
 joystickTriggerDownEvent = False
 joystickTriggerUpEvent = False
-
 leftRightAxis = 0
 upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
@@ -31,6 +28,7 @@ myBoatman = Boatman.Boatman()
 myBoatman.mAllowMovement = True
 
 bg = Background(background, 0, 0)
+myFish = FishObjects.Fish(Vector2(win_width/2, win_height/2), Vector2(5,5), "fish_1.png", "fish_2.png")
 
 joystick_count = pygame.joystick.get_count()
 
@@ -66,12 +64,15 @@ while not done:
 
         if evt.type == pygame.JOYBUTTONDOWN:
             if evt.button == 0:
-                print("A?")
+                if debugIsOn:
+                    print("A?")
             elif evt.button == 2:
                 """ X Button """
-                print("X!")
+                if debugIsOn:
+                    print("X!")
             elif evt.button == 3:
-                print("Y!")
+                if debugIsOn:
+                    print("Y!")
             elif evt.button == 6:
                 done = True
             elif evt.button == 7:
@@ -97,24 +98,29 @@ while not done:
         if abs(triggerAxis) < 0.5:
             joystickTriggerDown = False
             joystickTriggerUpEvent = True
-            print("Trigger up!")
+            if debugIsOn:
+                print("Trigger up!")
     else:
         if abs(triggerAxis) > 0.7:
             joystickTriggerDown = True
             joystickTriggerDownEvent = True
-            print("Trigger down!")
+            if debugIsOn:
+                print("Trigger down!")
 
     if key_pressed[pygame.K_w]:
-        upDownAxis = -0.1
+        upDownAxis = -0.6
 
     if key_pressed[pygame.K_s]:
-        upDownAxis = 0.1
+        upDownAxis = 0.6
 
     if key_pressed[pygame.K_a]:
-        leftRightAxis = -0.1
+        leftRightAxis = -0.6
 
     if key_pressed[pygame.K_d]:
-        leftRightAxis = 0.1
+        leftRightAxis = 0.6
+
+    if key_pressed[pygame.K_c]:
+        myFish.catch(Vector2(myBoatman.mPos.x + myBoatman.mWidth/2, myBoatman.mPos.y + myBoatman.mHeight/2))
 
     if abs(leftRightAxis) < 0.07:
         leftRightAxis = 0
@@ -133,6 +139,7 @@ while not done:
 
     myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
     myBoatman.update(deltaTime)
+    myFish.update(deltaTime)
 
     if runningTime >= 2.0:
         bg.move_right(3)
