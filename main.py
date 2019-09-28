@@ -58,7 +58,7 @@ while not done:
                 debugIsOn = not debugIsOn
         if evt.type == pygame.MOUSEBUTTONDOWN:
             if mouseL:
-                myBoatman.cast_at(Vector2(mouse_x, mouse_y))
+                myBoatman.cast_to(Vector2(mouse_x, mouse_y))
 
         if evt.type == pygame.JOYBUTTONDOWN:
             if evt.button == 0:
@@ -135,10 +135,17 @@ while not done:
     bg.draw(background, screen)
     myBoatman.draw(screen)
 
-    instructions1 = pygame.font.Font.render(stardewFont, "Left-click to", False, (255, 255, 255))
-    instructions2 = pygame.font.Font.render(stardewFont, "catch fish", False, (255, 255, 255))
-    screen.blit(instructions1, (800, 150))
-    screen.blit(instructions2, (838, 250))
+    title1 = pygame.font.Font.render(stardewFont, "Ultimate Fishing", True, (255, 255, 255))
+    title2 = pygame.font.Font.render(stardewFont, "Championship", True, (255, 255, 255))
+    instructions1 = pygame.font.Font.render(stardewFont, "Left-click to", True, (255, 255, 255))
+    instructions2 = pygame.font.Font.render(stardewFont, "catch fish", True, (255, 255, 255))
+
+    if deltaTime <= 5.0:
+        screen.blit(title1, (650, 150))
+        screen.blit(title2, (700, 250))
+    else:
+        screen.blit(instructions1, (750, 150))
+        screen.blit(instructions2, (788, 250))
 
     pygame.display.flip()
 
