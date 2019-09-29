@@ -43,7 +43,7 @@ class baseObject():
             self.colliderCuboid.updatePos(self.pos + Vector2(self.halfWidth, self.halfHeight))
 
     def draw(self, window):
-        window.blit(self.images[self.currentImage], (self.pos.i))
+        window.blit(self.images[self.currentImage], (self.pos.i2))
         #self.colliderCuboid.drawPygame(window, False, False)
         #self.currentImage = (self.currentImage + 1) % self.numOfImages
 

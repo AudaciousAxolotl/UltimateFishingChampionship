@@ -149,7 +149,7 @@ class Vector:
     @property
     def i2(self):
         """returns tuple of the integer value of the x and y coordinates of a vector of any size"""
-        return (self.mData[0], self.mData[1])
+        return (int(self.mData[0]), int(self.mData[1]))
 
     @property
     def v2(self):
