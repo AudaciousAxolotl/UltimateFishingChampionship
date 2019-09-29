@@ -11,13 +11,14 @@ class Boatman:
     mCurrentLineTarget: Vector2
     mCurrentBobberLocation: Vector2
 
-    def __init__(self, pos=Vector2(0, 0)):
+    def __init__(self, pos=Vector2(772, 600)):
         self.mPos = pos
         self.mVelocity = Vector2(0, 0)
         self.mAcceleration = Vector2(0, 0)
         self.mDrag = Vector2(0,0)
         self.mDragCoefficient = 0.995
-        self.mImage = pygame.image.load("img/boatman.png")
+        self.mImage = pygame.image.load("Boat.png")
+        self.mImage = pygame.transform.rotozoom(self.mImage, 0, 0.07)
         self.mMoveSpeed = 200
         self.mMaxSpeed = 300
         self.mLineCastStrength = 500

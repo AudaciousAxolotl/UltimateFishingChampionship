@@ -12,7 +12,7 @@ class baseObject():
         self.vel = vel
         self.images = []
         for image in images:
-            self.images.append(pygame.image.load(image))
+            self.images.append(pygame.transform.rotozoom(pygame.image.load(image), 0, 2))
         self.numOfImages = len(self.images)
         self.width = self.images[0].get_width()
         self.height = self.images[0].get_height()
@@ -37,8 +37,11 @@ class baseObject():
 
             if self.pos.x < 0 or self.pos.x > screen_width - self.width:
                 self.vel.x *= -1
+                for i in range(len(self.images)):
+                    self.images[i] = pygame.transform.flip(self.images[i], True, False)
             if self.pos.y < 0 or self.pos.y > screen_height - self.height:
                 self.vel.y *= -1
+
 
             self.colliderCuboid.updatePos(self.pos + Vector2(self.halfWidth, self.halfHeight))
 
@@ -52,6 +55,9 @@ class baseObject():
 
     def add_force(self, forceVec):
         pass
+
+    # def __del__(self):
+    #     print("die")
 
 
 class Fish(baseObject):
@@ -69,3 +75,9 @@ class Treasure(baseObject):
     def __init__(self, pos, vel, imageName):
         super().__init__(pos, vel, imageName)
         pass
+
+class Bob(baseObject):
+    def __init__(self, pos, vel, *images):
+        super().__init__(pos, vel, *images)
+        for i in range(len(self.images)):
+            self.images[i] = pygame.transform.rotozoom(self.images[i],0,  0.15)

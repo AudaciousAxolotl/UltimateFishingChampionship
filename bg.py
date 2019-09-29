@@ -12,7 +12,7 @@ class Background(object):
         screen.blit(img, (self.posX, self.posY))
 
     def move_down(self, speed):
-        self.posY += speed
+        self.posY -= speed
 
     def move_right(self, speed):
         self.posX -= speed
