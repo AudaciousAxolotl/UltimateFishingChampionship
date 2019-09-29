@@ -108,8 +108,10 @@ if joystick_count > 0:
 runningTime = 0
 
 stardewFont = pygame.font.Font("font/Stardew_Valley.otf", 100)
+stardewSubfont = pygame.font.Font("font/Stardew_Valley.otf", 50)
 title1X = 650
 title2X = 700
+instructionsX = 718
 
 
 introSequence = True
@@ -130,7 +132,7 @@ while introSequence:
         if putBobInBoat:
             putBobInBoat = False
             myBoatman.put_bob_in_boat()
-        bg.move_right(3.98) #was 2.78
+        bg.move_right(20.98) #was 2.78
         if bg.posX < -1280:
             bg.posX = -1280
 
@@ -159,16 +161,14 @@ while introSequence:
     control_string = "RT to"
     if joystick is None:
         control_string = "Left click to"
-    instructions1 = pygame.font.Font.render(stardewFont, control_string, True, (255, 255, 255))
-    instructions2 = pygame.font.Font.render(stardewFont, "catch fish", True, (255, 255, 255))
+    instructions = pygame.font.Font.render(stardewSubfont, control_string + " catch fish", True, (235, 225, 255))
 
     if runningTime < 10.0:
         shakeScreen.blit(title1, (title1X, 150))
         shakeScreen.blit(title2, (title2X, 250))
+        shakeScreen.blit(instructions, (instructionsX, 375))
 
     if runningTime >= 10.0:
-        shakeScreen.blit(instructions1, ((1280 / 2 - (instructions1.get_width() / 2)), 150))
-        shakeScreen.blit(instructions2, ((1280 / 2 - (instructions1.get_width()) + 12), 250))
         introSequence = False
 
 
@@ -176,15 +176,18 @@ while introSequence:
         if myBoatman.mVelocity.x <= 0:
             myBoatman.mVelocity = Vector2(0, 0)
 
-    if runningTime >= 5.0:
+    if runningTime >= 4.0:
         myBoatman.mAllowMovement = True
         myBoatman.add_force(Vector2(-11, 0))
         title1X -= 3
-        if title1X <= (1280 / 2 - (title1.get_width() / 2)):
-            title1X = (1280 / 2 - (title1.get_width() / 2))
+        if title1X <= (1280 / 2 - (title1.get_width() / 2.0)):
+            title1X = (1280 / 2 - (title1.get_width() / 2.0))
         title2X -= 3
-        if title2X <= (1280 / 2 - (title2.get_width() / 2)):
-            title2X = (1280 / 2 - (title2.get_width() / 2) - 1)
+        if title2X <= (1280 / 2 - (title2.get_width() / 2.0)):
+            title2X = (1280 / 2 - (title2.get_width() / 2.0) - 1)
+        instructionsX -= 3
+        if instructionsX <= (1280 / 2 - (instructions.get_width() / 2.0)):
+            instructionsX = (1280 / 2 - (instructions.get_width() / 2.0))
 
     if runningTime >= 10.0:
         bg.move_down(6.87)
