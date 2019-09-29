@@ -177,7 +177,7 @@ while not done:
     else:
         for fish in myFishList:
             if fish.isCaught:
-                fish.pos=myBoatman.mCurrentBobberLocation
+                fish.pos=(myBoatman.mCurrentBobberLocation-Vector2(fish.halfWidth, fish.halfHeight))
 
     myFishList[:] = [fish for fish in myFishList if not fish.isDead]
 

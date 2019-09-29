@@ -6,6 +6,43 @@
 from vector import *
 import pygame
 
+class QuickAndDirtyCollisionRect():
+    def __init__(self, start_pos, width, height):
+        self.mPos = start_pos
+        self.mWidth = width
+        self.mHeight = height
+
+    def set_pos(self, pos):
+        self.mPos = pos
+
+    def collides(self, other_rect):
+        if self.x < other_rect.x + other_rect.w and self.x + self.w > other_rect.x and self.y < other_rect.y + other_rect.h and self.y + self.h > other_rect.y:
+            return True
+        return False
+
+    @property
+    def x(self):
+        return self.mPos.x
+
+    @property
+    def y(self):
+        return self.mPos.y
+
+
+    @property
+    def w(self):
+        return self.mWidth
+
+    @property
+    def h(self):
+        """Gives the y value of the 2D Vector"""
+        return self.mHeight
+
+def checkRectCollision(rect1, rect2):
+    if rect1.x < rect2.x + rect2.w and rect1.x + rect1.w > rect2.x and rect1.y < rect2.y + rect2.h and rect1.y + rect1.h > rect2.y:
+        return True
+    return False
+
 class Shape():
     def __init__(self, color_tuple, pos_vector):
         self.mColor = color_tuple

@@ -23,7 +23,7 @@ class Boatman:
         self.mMaxSpeed = 300
         self.mLineCastStrength = 500
         self.mNextCastTimer = 0
-        self.mCastTime = 3.0
+        self.mCastTime = 2.0
         self.mHalfCastTime = self.mCastTime / 2
         self.mMaxSpeedSq = self.mMaxSpeed * self.mMaxSpeed
         self.mWidth = self.mImage.get_width()
@@ -42,11 +42,11 @@ class Boatman:
         self.mTargetReticleLocation = Vector2(screen_width/2, screen_height/2)
         self.mTargetReticleSpeed = 15
         self.mTargetReticleSize = 25
-        self.mBobberCollisionSphere = object.Sphere((255,0,0), Vector2(-1000, -1000), self.mBobberSize)
+        self.mBobberCollisionBox = object.QuickAndDirtyCollisionRect(self.mPos - Vector2(self.mBobberSize, self.mBobberSize), self.mBobberSize * 2, self.mBobberSize * 2)
 
     def update(self, delta_time):
         if self.mAllowMovement:
-            if self.mNextCastTimer > 0:
+            if self.mNextCastTimer >= 0:
                 self.mNextCastTimer -= delta_time
                 if self.mNextCastTimer < 0:
                     self.mNextCastTimer = 0
@@ -55,7 +55,7 @@ class Boatman:
                     self.mCastingOut = False
                     self.mCastLaunchPoint = None
                     self.mCaughtSomething = False
-                    self.mBobberCollisionSphere.mPos = Vector2(-1000,-1000)
+                    self.mBobberCollisionBox.set_pos(Vector2(-1000,-1000))
             self.mVelocity += self.mAcceleration * delta_time
             self.mVelocity *= self.mDragCoefficient
             if self.mVelocity.magnitudeSq > self.mMaxSpeedSq:
@@ -90,10 +90,10 @@ class Boatman:
             self.mCurrentLineTarget = None
             self.mCastLaunchPoint = None
         if self.mCastingOut or self.mReelingIn:
-            self.mBobberCollisionSphere.mPos = self.mCurrentBobberLocation
+            self.mBobberCollisionBox.set_pos(self.mCurrentBobberLocation - Vector2(self.mBobberSize, self.mBobberSize))
 
-    def checkBobberCollision(self, cuboid):
-        if not self.mCaughtSomething and object.collides(self.mBobberCollisionSphere, cuboid):
+    def checkBobberCollision(self, box):
+        if not self.mCaughtSomething and self.mBobberCollisionBox.collides(box):
             self.mCurrentLineTarget = self.mCurrentBobberLocation
             self.mCaughtSomething = True
             if self.mCastingOut:
@@ -102,7 +102,6 @@ class Boatman:
                 self.mReelingIn = True
             return True
         return False
-
 
     def add_force(self, force_vec2):
         if self.mAllowMovement:
@@ -116,7 +115,6 @@ class Boatman:
         pygame.draw.circle(screen, (0, 0, 255), self.mTargetReticleLocation.i2, self.mTargetReticleSize, 2)
         pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(0, self.mTargetReticleSize)).i2, (self.mTargetReticleLocation - Vector2(0, self.mTargetReticleSize)).i2, 2)
         pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(self.mTargetReticleSize, 0)).i2, (self.mTargetReticleLocation - Vector2(self.mTargetReticleSize, 0)).i2, 2)
-        # self.mBobberCollisionSphere.drawPygame(screen, False, False)
 
     def cast_at(self, target_vector, directly_at_location=False):
         if self.mAllowMovement:
@@ -136,7 +134,14 @@ class Boatman:
         self.cast_at(target_pos_vector, True)
 
     def cast_line(self):
-        self.cast_to(self.mTargetReticleLocation)
+        if not self.mCastingOut and not self.mReelingIn:
+            self.cast_to(self.mTargetReticleLocation)
+        elif self.mCastingOut:
+            if self.mNextCastTimer - self.mHalfCastTime > 0:
+                self.mNextCastTimer = self.mCastTime - self.mNextCastTimer
+                self.mCastingOut = False
+                self.mReelingIn = True
+                print(self.mNextCastTimer)
 
     def turn_on_movement(self):
         self.mAllowMovement = True
