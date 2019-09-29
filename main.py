@@ -1,5 +1,6 @@
 import pygame, time, random, Boatman, FishObjects
 from vector import *
+from bg import *
 
 pygame.display.init()
 pygame.mixer.init()
@@ -9,7 +10,9 @@ clock = pygame.time.Clock()
 win_width = 1280
 win_height = 720
 screen = pygame.display.set_mode((win_width, win_height))
-background = pygame.image.load("FISH_Starting_Level.jpg")
+background = pygame.image.load("Main_Scene.jpg")
+bg = Background(background, 0, 0)
+
 done = False
 debugIsOn = False
 joystick = None
@@ -25,7 +28,7 @@ deadZoneThreshold=0.085
 myBoatman = Boatman.Boatman()
 myBoatman.turn_on_movement()
 myFishList = []
-for i in range(20):
+for i in range(3):
     myFish = FishObjects.Fish(Vector2(random.randint(100, 1180), random.randint(100, 620)),
                               Vector2(random.randint(-20, 20), random.randint(-20, 20)), "fish_temp.jpg")
     myFishList.append(myFish)
@@ -36,12 +39,21 @@ if joystick_count > 0:
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
+runningTime = 0
+
+pygame.font.init()
+stardewFont = pygame.font.Font("font/Stardew_Valley.otf", 100)
+title1X = 650
+title2X = 700
+
 #Game Loop in dis bish
 while not done:
     deltaTime = clock.tick() / 1000.0
+    runningTime += deltaTime
 
     if joystick is None:
-        mouse_x, mouse_y = pygame.mouse.get_pos()
+        (mouseL, mouseM, mouseR) = pygame.mouse.get_pressed()
+        (mouse_x, mouse_y) = pygame.mouse.get_pos()
         myBoatman.set_target_reticle(Vector2(mouse_x, mouse_y))
 
     for evt in pygame.event.get():
@@ -162,11 +174,44 @@ while not done:
 
     myFishList[:] = [fish for fish in myFishList if not fish.isDead]
 
-    screen.blit(background, (0, 0))
+    screen.fill((0, 0, 0))
 
-    myBoatman.draw(screen)
     for fish in myFishList:
         fish.draw(screen)
+
+    if runningTime >= 2.0:
+        bg.move_right(5)
+        if bg.posX < -1280:
+            bg.posX = -1280
+
+    bg.draw(background, screen)
+    myBoatman.draw(screen)
+
+    title1 = pygame.font.Font.render(stardewFont, "Ultimate Fishing", True, (255, 255, 255))
+    title2 = pygame.font.Font.render(stardewFont, "Championship", True, (255, 255, 255))
+    instructions1 = pygame.font.Font.render(stardewFont, "CLICK SOMETHING to", True, (255, 255, 255))
+    instructions2 = pygame.font.Font.render(stardewFont, "catch fish", True, (255, 255, 255))
+
+    if runningTime < 10.0:
+        screen.blit(title1, (title1X, 150))
+        screen.blit(title2, (title2X, 250))
+    if runningTime >= 10.0:
+        screen.blit(instructions1, ((1280/2 - (instructions1.get_width()/2)), 150))
+        screen.blit(instructions2, ((1280/2 - (instructions1.get_width()/2)+35), 250))
+        myBoatman.mAllowMovement = True
+
+    if runningTime >= 2.0:
+        myBoatman.mAllowMovement = True
+        myBoatman.add_force(Vector2(-150, 0))
+        title1X -= 3
+        if title1X <= (1280 / 2 - (title1.get_width() / 2)):
+            title1X = (1280 / 2 - (title1.get_width() / 2))
+        title2X -= 3
+        if title2X <= (1280 / 2 - (title2.get_width() / 2)):
+            title2X = (1280 / 2 - (title2.get_width() / 2 + 3))
+        if myBoatman.mPos.x <= ((1280 / 2) + (myBoatman.mHalfWidth)):
+            myBoatman.mAcceleration = Vector2(0, 0)
+
     pygame.display.flip()
 
 pygame.font.quit()
