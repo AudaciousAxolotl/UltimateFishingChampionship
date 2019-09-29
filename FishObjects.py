@@ -16,6 +16,7 @@ class baseObject():
         self.offsetVel = Vector2(0, offset_vec.y)
         self.readyToFlyIn = False
         self.readyToFlutter = False
+        self.collidedWith = False
         self.facingLeft = False
         self.images = []
         self.leftImages = []
@@ -36,6 +37,8 @@ class baseObject():
         self.colliderCuboid = object.QuickAndDirtyCollisionRect(self.pos, self.width, self.height)
 
     def update(self, deltaTime):
+        if self.collidedWith:
+            self.collidedWith = False
         if self.readyToFlutter:
             if not self.isCaught:
                 self.pos += self.vel * deltaTime
@@ -47,6 +50,7 @@ class baseObject():
                 if self.pos.x < 0 or self.pos.x > screen_width - self.width:
                     self.vel.x *= -1
                     self.facingLeft = not self.facingLeft
+                    print(screen_width, self.width)
 
                 if self.pos.y < 0 or self.pos.y > screen_height - self.height:
                     self.vel.y *= -1
@@ -113,3 +117,5 @@ class Bob(baseObject):
         for i in range(len(self.images)):
             self.images[i] = pygame.transform.rotozoom(self.images[i],0,  0.15)
             self.leftImages[i] = pygame.transform.rotozoom(self.leftImages[i], 0, 0.15)
+
+        self.width = self.images[0].get_width()

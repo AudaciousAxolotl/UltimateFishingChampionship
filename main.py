@@ -1,6 +1,7 @@
 import pygame, time, random, Boatman, FishObjects, itertools
 from copy import deepcopy
 from vector import *
+from object import *
 from bg import *
 from star import *
 
@@ -112,6 +113,7 @@ title2X = 700
 
 
 introSequence = True
+putBobInBoat = True
 
 # This will be the first game loop, it will handle the intro sequence. Once the game starts, this loop will end and the
 # next loop will begin.
@@ -120,9 +122,14 @@ while introSequence:
     deltaTime = clock.tick() / 1000.0
     runningTime += deltaTime
     myBoatman.update(deltaTime)
-    BOB.update(deltaTime)
+    if not BOB.isDead:
+        BOB.update(deltaTime)
 
     if runningTime >= 4.0: #was 5.0
+        BOB.die()
+        if putBobInBoat:
+            putBobInBoat = False
+            myBoatman.put_bob_in_boat()
         bg.move_right(3.98) #was 2.78
         if bg.posX < -1280:
             bg.posX = -1280
@@ -138,14 +145,14 @@ while introSequence:
                 introSequence = False
             if evt.key == pygame.K_F6:
                 debugIsOn = not debugIsOn
-
     ### DRAWING
 
     #screen.fill((0, 0, 0))
     shakeScreen.fill((0, 0, 0))
     bg.draw(background, shakeScreen)
     myBoatman.draw(shakeScreen)
-    BOB.draw(shakeScreen)
+    if not BOB.isDead:
+        BOB.draw(shakeScreen)
 
     title1 = pygame.font.Font.render(stardewFont, "Ultimate Fishing", True, (255, 255, 255))
     title2 = pygame.font.Font.render(stardewFont, "Championship", True, (255, 255, 255))
@@ -202,9 +209,6 @@ while not done:
     if gameStarted:
         screenMoveUp -= 7
 
-    for star in starsArray:
-        star.move()
-
     if pauseUpdates:
         updatePauseTimer -= deltaTime
         if updatePauseTimer < 0:
@@ -214,6 +218,21 @@ while not done:
     if not pauseUpdates:
         for fish in myFishList:
             fish.update(deltaTime)
+
+        for i in range (0, len(myFishList)):
+            for j in range(i+1, len(myFishList)):
+                if i != j and checkRectCollision(myFishList[i].colliderCuboid, myFishList[j].colliderCuboid):
+                    if myFishList[i].readyToFlutter and myFishList[j].readyToFlutter \
+                            and not myFishList[i].collidedWith and not myFishList[j].collidedWith:
+                        #TODO play fish collision sound
+                        collisionVector = (myFishList[i].center_pos - myFishList[j].center_pos).normalized
+                        myFishList[i].vel = myFishList[i].vel.magnitude * collisionVector
+                        myFishList[j].vel = myFishList[j].vel.magnitude * -collisionVector
+                        myFishList[i].center_pos += (0.5 * collisionVector)
+                        myFishList[j].center_pos -= (0.5 * collisionVector)
+
+        for star in starsArray:
+            star.move()
 
         myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
         myBoatman.update(deltaTime)

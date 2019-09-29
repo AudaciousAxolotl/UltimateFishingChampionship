@@ -194,8 +194,9 @@ class Boatman:
                 self.mReelingIn = True
 
     def put_bob_in_boat(self):
-        self.mBobInBoat = True
-        self.mPos -= Vector2(0, self.mFrameHeightDiff)
+        if not self.mBobInBoat:
+            self.mBobInBoat = True
+            self.mPos -= Vector2(0, self.mFrameHeightDiff)
 
     def take_bob_out_of_boat(self):
         self.mBobInBoat = False
