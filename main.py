@@ -2,6 +2,7 @@ import pygame, time, random, Boatman, FishObjects, itertools
 from copy import deepcopy
 from vector import *
 from bg import *
+from star import *
 
 pygame.display.init()
 pygame.mixer.init()
@@ -12,6 +13,7 @@ win_width = 1280
 win_height = 720
 screen = pygame.display.set_mode((win_width, win_height))
 background = pygame.image.load("Main_Scene.jpg")
+waterScene = pygame.image.load("FISH_water.jpg")
 bg = Background(background, 0, 0)
 done = False
 debugIsOn = False
@@ -20,13 +22,15 @@ joystickTriggerDown = False
 joystickTriggerDownEvent = False
 joystickTriggerUpEvent = False
 pauseUpdates = False
-updatePauseTime = 0.35
+updatePauseTime = 0.4
 updatePauseTimer = 0
 leftRightAxis = 0
 upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
 triggerAxis = 0
 deadZoneThreshold=0.085
+screenMoveUp = 0
+starfieldMoveUp = 0
 
 ### Screen Shake Stuff ###
 offset = itertools.repeat((0,0))
@@ -53,6 +57,18 @@ def shake(multiplier):
 
 ### End of non-gameloop screen shake stuff ###
 
+starsArray = []
+for i in range(50):
+    starsArray.append(star(Vector2(random.randint(0,1280), random.randint(0, 720)),
+                           3,1))
+
+for i in range(50):
+    starsArray.append(star(Vector2(random.randint(0,1280), random.randint(0, 720)),
+                           5,3))
+
+for i in range(50):
+    starsArray.append(star(Vector2(random.randint(0,1280), random.randint(0, 720)),
+                           7,5))
 
 fishPics =[["Boot_1.png", "Boot_2.png"],
            ["Coin_1.png", "Coin_2.png"],
@@ -90,7 +106,6 @@ if joystick_count > 0:
 
 runningTime = 0
 
-pygame.font.init()
 stardewFont = pygame.font.Font("font/Stardew_Valley.otf", 100)
 title1X = 650
 title2X = 700
@@ -107,8 +122,8 @@ while introSequence:
     myBoatman.update(deltaTime)
     BOB.update(deltaTime)
 
-    if runningTime >= 5.0:
-        bg.move_right(2.78)
+    if runningTime >= 4.0: #was 5.0
+        bg.move_right(3.98) #was 2.78
         if bg.posX < -1280:
             bg.posX = -1280
 
@@ -174,6 +189,7 @@ while introSequence:
 
 
 myBoatman.turn_on_movement()
+gameStarted = False
 
 #Game Loop in dis bish
 while not done:
@@ -182,7 +198,12 @@ while not done:
     #       UPDATES                 #
     #                               #
     #################################
-    deltaTime = clock.tick() / 1000.0
+    deltaTime = clock.tick(60) / 1000.0
+    if gameStarted:
+        screenMoveUp -= 7
+
+    for star in starsArray:
+        star.move()
 
     if pauseUpdates:
         updatePauseTimer -= deltaTime
@@ -245,6 +266,7 @@ while not done:
                 if evt.button == 1:
                     if joystick is None:
                         myBoatman.cast_line()
+                        gameStarted = True
 
             if evt.type == pygame.JOYBUTTONDOWN:
                 if evt.button == 0:
@@ -340,8 +362,12 @@ while not done:
     #################################
 
     screen.fill((0, 0, 0))
-    shakeScreen.fill((0, 0, 0))
-    bg.draw(background, shakeScreen)
+    shakeScreen.fill((51, 0, 102))
+    for star in starsArray:
+        star.draw(shakeScreen)
+    shakeScreen.blit(waterScene, (0, screenMoveUp))
+    #bg.draw(background, shakeScreen)
+
     myBoatman.draw(shakeScreen)
     for fish in myFishList:
         fish.draw(shakeScreen)
