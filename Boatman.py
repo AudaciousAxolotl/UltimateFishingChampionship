@@ -17,8 +17,16 @@ class Boatman:
         self.mAcceleration = Vector2(0, 0)
         self.mDrag = Vector2(0,0)
         self.mDragCoefficient = 0.995
-        self.mImage = pygame.image.load("Boat.png")
-        self.mImage = pygame.transform.rotozoom(self.mImage, 0, 0.07)
+        self.mBobInBoat = False
+        self.mBobCastingFrames = {}
+        # 1 = right, -1 = left
+        self.mCurrentCastDirection = 1
+        self.mCurrentCastFrame = 1
+        for i in range(1, 7):
+            self.mBobCastingFrames[(1, i)] = pygame.image.load("Bob_F_" + str(i) + ".png")
+            self.mBobCastingFrames[(-1, i)] = pygame.image.load("Bob_F_L_" + str(i) + ".png")
+        self.mBoatImage = pygame.image.load("BoatScaled.png")
+        self.mImage = self.mBoatImage
         self.mMoveSpeed = 200
         self.mMaxSpeed = 300
         self.mLineCastStrength = 500
@@ -26,10 +34,11 @@ class Boatman:
         self.mCastTime = 2.0
         self.mHalfCastTime = self.mCastTime / 2
         self.mMaxSpeedSq = self.mMaxSpeed * self.mMaxSpeed
-        self.mWidth = self.mImage.get_width()
+        self.mWidth = self.mBobCastingFrames[(self.mCurrentCastDirection, self.mCurrentCastFrame)].get_width()
         self.mHalfWidth = self.mWidth / 2
-        self.mHeight = self.mImage.get_height()
+        self.mHeight = self.mBobCastingFrames[(self.mCurrentCastDirection, self.mCurrentCastFrame)].get_height()
         self.mHalfHeight = self.mHeight / 2
+        self.mFrameHeightDiff = self.mHeight - self.mImage.get_height()
         self.mBobberSize = 5
         self.mCurrentLineTarget = None
         self.mCurrentBobberLocation = None
@@ -43,6 +52,19 @@ class Boatman:
         self.mTargetReticleSpeed = 15
         self.mTargetReticleSize = 25
         self.mBobberCollisionBox = object.QuickAndDirtyCollisionRect(self.mPos - Vector2(self.mBobberSize, self.mBobberSize), self.mBobberSize * 2, self.mBobberSize * 2)
+
+        self.mPoleLocation = {(1, 1): Vector2(192, 76),
+                              (1, 2): Vector2(174, 23),
+                              (1, 3): Vector2(181, 26),
+                              (1, 4): Vector2(181, 26),
+                              (1, 5): Vector2(174, 19),
+                              (1, 6): Vector2(191, 75),
+                              (-1, 1): Vector2(61, 75),
+                              (-1, 2): Vector2(81, 23),
+                              (-1, 3): Vector2(71, 26),
+                              (-1, 4): Vector2(71, 26),
+                              (-1, 5): Vector2(76, 19),
+                              (-1, 6): Vector2(63, 75)}
 
     def update(self, delta_time):
         if self.mAllowMovement:
@@ -94,7 +116,8 @@ class Boatman:
 
     def checkBobberCollision(self, box):
         if not self.mCaughtSomething and self.mBobberCollisionBox.collides(box):
-            self.mCurrentLineTarget = self.mCurrentBobberLocation
+            self.mCurrentLineTarget = box.center
+            self.mCurrentBobberLocation = self.mCurrentLineTarget
             self.mCaughtSomething = True
             if self.mCastingOut:
                 self.mNextCastTimer = self.mHalfCastTime
@@ -108,6 +131,8 @@ class Boatman:
             self.mAcceleration += force_vec2
 
     def draw(self, screen):
+        if self.mBobInBoat:
+            self.mImage = self.mBobCastingFrames[(self.mCurrentCastDirection, self.mCurrentCastFrame)]
         screen.blit(self.mImage, (int(self.x), int(self.y)))
         if self.mCurrentLineTarget is not None:
             pygame.draw.line(screen, (255, 255, 255), self.fishing_pole_tip.i2, self.mCurrentBobberLocation.i2, 3)
@@ -141,10 +166,19 @@ class Boatman:
                 self.mNextCastTimer = self.mCastTime - self.mNextCastTimer
                 self.mCastingOut = False
                 self.mReelingIn = True
-                print(self.mNextCastTimer)
+
+    def put_bob_in_boat(self):
+        self.mBobInBoat = True
+        self.mPos -= Vector2(0, self.mFrameHeightDiff)
+
+    def take_bob_out_of_boat(self):
+        self.mBobInBoat = False
+        self.mPos += Vector2(0, self.mFrameHeightDiff)
+        self.mImage = self.mBoatImage
 
     def turn_on_movement(self):
         self.mAllowMovement = True
+        self.put_bob_in_boat()
 
     def turn_off_movement(self):
         self.mAllowMovement = False
@@ -181,7 +215,9 @@ class Boatman:
 
     @property
     def fishing_pole_tip(self):
-        return Vector2(self.x + self.mHalfWidth, self.y + self.mHalfHeight)
+        return self.mPos + self.mPoleLocation[(self.mCurrentCastDirection, self.mCurrentCastFrame)]
 
+    @property
     def bobber_location(self):
         return self.mCurrentBobberLocation
+

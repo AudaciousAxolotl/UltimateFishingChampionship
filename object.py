@@ -38,6 +38,10 @@ class QuickAndDirtyCollisionRect():
         """Gives the y value of the 2D Vector"""
         return self.mHeight
 
+    @property
+    def center(self):
+        return self.mPos + Vector2(self.mWidth/2, self.mHeight/2)
+
 def checkRectCollision(rect1, rect2):
     if rect1.x < rect2.x + rect2.w and rect1.x + rect1.w > rect2.x and rect1.y < rect2.y + rect2.h and rect1.y + rect1.h > rect2.y:
         return True

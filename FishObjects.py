@@ -57,6 +57,21 @@ class baseObject():
     # def __del__(self):
     #     print("die")
 
+    @property
+    def x(self):
+        return self.pos.x
+
+    @property
+    def y(self):
+        return self.pos.y
+
+    @property
+    def center_pos(self):
+        return self.pos + Vector2(self.halfWidth, self.halfHeight)
+
+    @center_pos.setter
+    def center_pos(self, new_center):
+        self.pos = new_center - Vector2(self.halfWidth, self.halfHeight)
 
 class Fish(baseObject):
     def __init__(self, pos, vel, *images):
