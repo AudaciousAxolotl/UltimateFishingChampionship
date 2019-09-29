@@ -12,9 +12,13 @@ pygame.joystick.init()
 clock = pygame.time.Clock()
 win_width = 1280
 win_height = 720
-screen = pygame.display.set_mode((win_width, win_height))
+screen = pygame.display.set_mode((win_width, win_height), pygame.FULLSCREEN)
 background = pygame.image.load("Main_Scene.jpg")
 waterScene = pygame.image.load("FISH_water.jpg")
+credits = pygame.transform.scale(pygame.image.load("credits.png"), (1280, 720))
+textBubble = pygame.image.load("happy_features.png")
+textBubble = pygame.transform.rotozoom(textBubble, 0, 0.2)
+#lureHitFishSounds = pygame.mixer.('ufc_lure_hit_fish.mp3')
 bg = Background(background, 0, 0)
 done = False
 debugIsOn = False
@@ -39,6 +43,7 @@ shakeScreen = screen.copy()
 
 tintColor = (25,25,25)
 tintAlpha = 200
+alph = 0
 
 fullScreenTintOverlay = screen.copy()
 fullScreenTintOverlay.fill(tintColor)
@@ -117,11 +122,14 @@ instructionsX = 718
 introSequence = True
 putBobInBoat = True
 
+pygame.mixer.music.load("ufc_intro_theme.mp3")
+pygame.mixer.music.play(0)
+
 # This will be the first game loop, it will handle the intro sequence. Once the game starts, this loop will end and the
 # next loop will begin.
 while introSequence:
     ### UPDATES
-    deltaTime = clock.tick() / 1000.0
+    deltaTime = clock.tick(60) / 1000.0
     runningTime += deltaTime
     myBoatman.update(deltaTime)
     if not BOB.isDead:
@@ -132,7 +140,7 @@ while introSequence:
         if putBobInBoat:
             putBobInBoat = False
             myBoatman.put_bob_in_boat()
-        bg.move_right(20.98) #was 2.78
+        bg.move_right(3.98) #was 2.78
         if bg.posX < -1280:
             bg.posX = -1280
 
@@ -200,6 +208,9 @@ while introSequence:
 
 myBoatman.turn_on_movement()
 gameStarted = False
+windCountDown = 14.0
+cr = False
+creditScene = False
 
 #Game Loop in dis bish
 while not done:
@@ -227,7 +238,7 @@ while not done:
                 if i != j and checkRectCollision(myFishList[i].colliderCuboid, myFishList[j].colliderCuboid):
                     if myFishList[i].readyToFlutter and myFishList[j].readyToFlutter \
                             and not myFishList[i].collidedWith and not myFishList[j].collidedWith:
-                        #TODO play fish collision sound
+
                         collisionVector = (myFishList[i].center_pos - myFishList[j].center_pos).normalized
                         myFishList[i].vel = myFishList[i].vel.magnitude * collisionVector
                         myFishList[j].vel = myFishList[j].vel.magnitude * -collisionVector
@@ -245,10 +256,16 @@ while not done:
                 if fish.isCaught:
                     fish.die()
                     offset = shake(1.0)
-                    #TODO: play item/fish caught sound
+                    pygame.mixer.Channel(1).play(pygame.mixer.Sound('ufc_caught_fish.ogg'))
                 else:
                     fish.isCaught = myBoatman.checkBobberCollision(fish.colliderCuboid)
                     if fish.isCaught:
+                        if fish.get_type() == "Hard":
+                            pygame.mixer.Channel(0).play(pygame.mixer.Sound('ufc_lure_hit_crab.ogg'))
+                        else:
+                            pygame.mixer.Channel(0).play(pygame.mixer.Sound('ufc_lure_hit_fish.ogg'))
+
+                        pygame.mixer.Channel(3).play(pygame.mixer.Sound('ufc_reeling_sound.ogg'))
                         offset = shake(0.5)
                         pauseUpdates = True
                         updatePauseTimer = updatePauseTime
@@ -288,6 +305,13 @@ while not done:
                 if evt.button == 1:
                     if joystick is None:
                         myBoatman.cast_line()
+                        #pygame.mixer.Channel(3).play(pygame.mixer.Sound('ufc_casting_sound.ogg'))
+                        if gameStarted == False:
+                            pygame.mixer.Channel(5).play(pygame.mixer.Sound('ufc_wind_flying_through_air.ogg'), loops=-1)
+                            pygame.mixer.Channel(6).play(pygame.mixer.Sound('ufc_constant_water_and_boat_sound.ogg'),
+                                                         loops=-1)
+                            pygame.mixer.music.load("ufc_battle_theme.mp3")
+                            pygame.mixer.music.play(0)
                         gameStarted = True
                         for fish in myFishList:
                             fish.fly_in()
@@ -356,6 +380,9 @@ while not done:
                 else:
                     leftRightAxis = 0
 
+        if key_pressed[pygame.K_c]:
+            cr = True
+
         if abs(leftRightAxis) < deadZoneThreshold:
             leftRightAxis = 0
 
@@ -403,6 +430,25 @@ while not done:
         caughtFishList[0].draw(shakeScreen)
 
     screen.blit(shakeScreen, next(offset))
+
+    if creditScene:
+        alph -= 5
+        fullScreenTintOverlay.set_alpha(alph)
+        screen.blit(credits, (0,0))
+        myBoatman.mPos = Vector2(700,600)
+        myBoatman.draw(screen)
+        screen.blit(textBubble, Vector2(myBoatman.mPos.x-175, myBoatman.mPos.y-50))
+        screen.blit(fullScreenTintOverlay, (0, 0))
+
+
+    if cr:
+        alph += 5
+        fullScreenTintOverlay.set_alpha(alph)
+        screen.blit(fullScreenTintOverlay, (0, 0))
+        if alph == 255:
+            creditScene = True
+            cr = False
+
     pygame.display.flip()
 
 

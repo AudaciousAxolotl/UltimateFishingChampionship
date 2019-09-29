@@ -8,6 +8,7 @@ screen_height = 720
 
 class baseObject():
     def __init__(self, pos, vel, images, left_images, offset_vec):
+        self.basename = images[0][:-6]
         self.pos = pos
         self.startPos = pos
         self.vel = vel
@@ -98,6 +99,11 @@ class baseObject():
     @center_pos.setter
     def center_pos(self, new_center):
         self.pos = new_center - Vector2(self.halfWidth, self.halfHeight)
+
+    def get_type(self):
+        if self.basename in ["Boot", "Coin", "Crab", "Shell", "Skull"]:
+            return "Hard"
+        return "Soft"
 
 class Fish(baseObject):
     def __init__(self, pos, vel, images, left_images, offset_vector):
