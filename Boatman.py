@@ -110,11 +110,11 @@ class Boatman:
     def draw(self, screen):
         screen.blit(self.mImage, (int(self.x), int(self.y)))
         if self.mCurrentLineTarget is not None:
-            pygame.draw.line(screen, (255, 255, 255), self.fishing_pole_tip.i, self.mCurrentBobberLocation.i, 3)
-            pygame.draw.circle(screen, (255, 40, 80), self.mCurrentBobberLocation.i, 5)
-        pygame.draw.circle(screen, (0, 0, 255), self.mTargetReticleLocation.i, self.mTargetReticleSize, 2)
-        pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(0, self.mTargetReticleSize)).i, (self.mTargetReticleLocation - Vector2(0, self.mTargetReticleSize)).i, 2)
-        pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(self.mTargetReticleSize, 0)).i, (self.mTargetReticleLocation - Vector2(self.mTargetReticleSize, 0)).i, 2)
+            pygame.draw.line(screen, (255, 255, 255), self.fishing_pole_tip.i2, self.mCurrentBobberLocation.i2, 3)
+            pygame.draw.circle(screen, (255, 40, 80), self.mCurrentBobberLocation.i2, 5)
+        pygame.draw.circle(screen, (0, 0, 255), self.mTargetReticleLocation.i2, self.mTargetReticleSize, 2)
+        pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(0, self.mTargetReticleSize)).i2, (self.mTargetReticleLocation - Vector2(0, self.mTargetReticleSize)).i2, 2)
+        pygame.draw.line(screen, (0, 0, 255), (self.mTargetReticleLocation + Vector2(self.mTargetReticleSize, 0)).i2, (self.mTargetReticleLocation - Vector2(self.mTargetReticleSize, 0)).i2, 2)
         # self.mBobberCollisionSphere.drawPygame(screen, False, False)
 
     def cast_at(self, target_vector, directly_at_location=False):
