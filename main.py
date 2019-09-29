@@ -54,24 +54,33 @@ def shake(multiplier):
 ### End of non-gameloop screen shake stuff ###
 
 
-fishPics =[("Boot_1.png", "Boot_2.png"),
-           ("Coin_1.png", "Coin_2.png"),
-           ("Crab_1.png", "Crab_2.png"),
-           ("fish_1.png", "fish_2.png"),
-           ("Peach_1.png", "Peach_2.png"),
-           ("Shell_1.png", "Shell_2.png"),
-           ("Skull_1.png", "Skull_2.png")]
+fishPics =[["Boot_1.png", "Boot_2.png"],
+           ["Coin_1.png", "Coin_2.png"],
+           ["Crab_1.png", "Crab_2.png"],
+           ["fish_1.png", "fish_2.png"],
+           ["Peach_1.png", "Peach_2.png"],
+           ["Shell_1.png", "Shell_2.png"],
+           ["Skull_1.png", "Skull_2.png"]]
+
+fishLeftPics =[["Boot_1_l.png", "Boot_2_l.png"],
+           ["Coin_1_l.png", "Coin_2_l.png"],
+           ["Crab_1_l.png", "Crab_2_l.png"],
+           ["fish_1_l.png", "fish_2_l.png"],
+           ["Peach_1_l.png", "Peach_2_l.png"],
+           ["Shell_1_l.png", "Shell_2_l.png"],
+           ["Skull_1_l.png", "Skull_2_l.png"]]
 
 myBoatman = Boatman.Boatman()
 myFishList = []
 caughtFishList = []
 for i in range(10):
     myFish = FishObjects.Fish(Vector2(random.randint(100, 1180), random.randint(100, 620)),
-                              Vector2(random.randint(-50, -20), random.randint(-20, 20)), *fishPics[i%7])
+                              Vector2(random.randint(-50, -20), random.randint(-20, 20)),
+                              fishPics[i % 7], fishLeftPics[i % 7])
     myFishList.append(myFish)
 
 
-BOB = FishObjects.Bob(Vector2(333, 550), Vector2(100, 0), "Bob_1.png", "Bob_2.png", "Bob_3.png", "Bob_4.png")
+BOB = FishObjects.Bob(Vector2(333, 550), Vector2(100, 0), ["Bob_1.png", "Bob_2.png", "Bob_3.png", "Bob_4.png"], ["Bob_1.png", "Bob_2.png", "Bob_3.png", "Bob_4.png"])
 
 joystick_count = pygame.joystick.get_count()
 
@@ -197,6 +206,7 @@ while not done:
                 else:
                     fish.isCaught = myBoatman.checkBobberCollision(fish.colliderCuboid)
                     if fish.isCaught:
+                        offset = shake(0.5)
                         pauseUpdates = True
                         updatePauseTimer = updatePauseTime
                         break

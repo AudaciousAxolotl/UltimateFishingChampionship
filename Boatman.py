@@ -22,6 +22,7 @@ class Boatman:
         # 1 = right, -1 = left
         self.mCurrentCastDirection = 1
         self.mCurrentCastFrame = 1
+        self.mAnimationTimer = 0
         for i in range(1, 7):
             self.mBobCastingFrames[(1, i)] = pygame.image.load("Bob_F_" + str(i) + ".png")
             self.mBobCastingFrames[(-1, i)] = pygame.image.load("Bob_F_L_" + str(i) + ".png")
@@ -53,22 +54,39 @@ class Boatman:
         self.mTargetReticleSize = 25
         self.mBobberCollisionBox = object.QuickAndDirtyCollisionRect(self.mPos - Vector2(self.mBobberSize, self.mBobberSize), self.mBobberSize * 2, self.mBobberSize * 2)
 
-        self.mPoleLocation = {(1, 1): Vector2(192, 76),
-                              (1, 2): Vector2(174, 23),
-                              (1, 3): Vector2(181, 26),
-                              (1, 4): Vector2(181, 26),
-                              (1, 5): Vector2(174, 19),
-                              (1, 6): Vector2(191, 75),
-                              (-1, 1): Vector2(61, 75),
+        self.mPoleLocation = {(1, 1): Vector2(178, 63),
+                              (1, 2): Vector2(168, 15),
+                              (1, 3): Vector2(161, 9),
+                              (1, 4): Vector2(161, 9),
+                              (1, 5): Vector2(168, 15),
+                              (1, 6): Vector2(177, 62),
+                              (-1, 1): Vector2(46, 19),
                               (-1, 2): Vector2(81, 23),
-                              (-1, 3): Vector2(71, 26),
-                              (-1, 4): Vector2(71, 26),
-                              (-1, 5): Vector2(76, 19),
-                              (-1, 6): Vector2(63, 75)}
+                              (-1, 3): Vector2(53, 10),
+                              (-1, 4): Vector2(53, 10),
+                              (-1, 5): Vector2(53, 10),
+                              (-1, 6): Vector2(36, 63)}
+        self.mCurrentAnimationNumber = -1
+        self.mCurrentAnimationStep = 0
+        self.mAnimating = False
+        # 0 = casting
+        # 1 = reeling
+        # 2 = back to static
+        self.mAnimations = [[(1, 0.05), (2, 0.1), (3, -1)],
+                            [(3, 0.08), (5, -1)],
+                            [(5, 0.05), (1, -1)]]
 
     def update(self, delta_time):
         if self.mAllowMovement:
-            if self.mNextCastTimer >= 0:
+            if self.mAnimating:
+                self.mAnimationTimer -= delta_time
+                if self.mAnimationTimer < 0:
+                    self.mCurrentAnimationStep += 1
+                    self.mAnimationTimer = self.mAnimations[self.mCurrentAnimationNumber][self.mCurrentAnimationStep][1]
+                    self.mCurrentCastFrame = self.mAnimations[self.mCurrentAnimationNumber][self.mCurrentAnimationStep][0]
+                    if self.mAnimationTimer == -1:
+                        self.mAnimating = False
+            if self.mCastingOut or self.mReelingIn:
                 self.mNextCastTimer -= delta_time
                 if self.mNextCastTimer < 0:
                     self.mNextCastTimer = 0
@@ -78,6 +96,7 @@ class Boatman:
                     self.mCastLaunchPoint = None
                     self.mCaughtSomething = False
                     self.mBobberCollisionBox.set_pos(Vector2(-1000,-1000))
+                    self.play_animation(2)
             self.mVelocity += self.mAcceleration * delta_time
             self.mVelocity *= self.mDragCoefficient
             if self.mVelocity.magnitudeSq > self.mMaxSpeedSq:
@@ -101,6 +120,7 @@ class Boatman:
                 if self.mNextCastTimer < self.mHalfCastTime:
                     self.mCastingOut = False
                     self.mReelingIn = True
+                    self.play_animation(1)
                     percentCast = 1.0
                 self.mCurrentBobberLocation = self.mCastLaunchPoint + (percentCast * self.mCastingVector)
         else:
@@ -151,9 +171,14 @@ class Boatman:
                     self.mCurrentLineTarget = self.fishing_pole_tip + (target_vector * self.mLineCastStrength)
                 self.mCurrentBobberLocation = self.fishing_pole_tip
                 self.mCastingVector = self.mCurrentLineTarget - self.mCurrentBobberLocation
+                if self.mCastingVector.x < 0:
+                    self.mCurrentCastDirection = -1
+                else:
+                    self.mCurrentCastDirection = 1
                 self.mCastLaunchPoint = self.mCurrentBobberLocation
                 self.mCastingOut = True
                 self.mReelingIn = False
+                self.play_animation(0)
 
     def cast_to(self, target_pos_vector):
         self.cast_at(target_pos_vector, True)
@@ -163,6 +188,7 @@ class Boatman:
             self.cast_to(self.mTargetReticleLocation)
         elif self.mCastingOut:
             if self.mNextCastTimer - self.mHalfCastTime > 0:
+                self.play_animation(1)
                 self.mNextCastTimer = self.mCastTime - self.mNextCastTimer
                 self.mCastingOut = False
                 self.mReelingIn = True
@@ -196,6 +222,12 @@ class Boatman:
             self.mTargetReticleLocation.x = screen_width
         if self.mTargetReticleLocation.y > screen_height:
             self.mTargetReticleLocation.y = screen_height
+
+    def play_animation(self, anim_number):
+        self.mAnimating = True
+        self.mCurrentAnimationNumber = anim_number
+        self.mCurrentAnimationStep = 0
+        self.mAnimationTimer = self.mAnimations[anim_number][0][1]
 
     @property
     def x(self):

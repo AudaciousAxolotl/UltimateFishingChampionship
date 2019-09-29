@@ -7,12 +7,16 @@ screen_width = 1280
 screen_height = 720
 
 class baseObject():
-    def __init__(self, pos, vel, *images):
+    def __init__(self, pos, vel, images, left_images):
         self.pos = pos
         self.vel = vel
+        self.facingLeft = False
         self.images = []
+        self.leftImages = []
         for image in images:
             self.images.append(pygame.transform.rotozoom(pygame.image.load(image), 0, 2))
+        for left_image in left_images:
+            self.leftImages.append(pygame.transform.rotozoom(pygame.image.load(left_image), 0, 2))
         self.numOfImages = len(self.images)
         self.width = self.images[0].get_width()
         self.height = self.images[0].get_height()
@@ -36,15 +40,18 @@ class baseObject():
 
             if self.pos.x < 0 or self.pos.x > screen_width - self.width:
                 self.vel.x *= -1
-                for i in range(len(self.images)):
-                    self.images[i] = pygame.transform.flip(self.images[i], True, False)
+                self.facingLeft = not self.facingLeft
+
             if self.pos.y < 0 or self.pos.y > screen_height - self.height:
                 self.vel.y *= -1
 
             self.colliderCuboid.set_pos(self.pos)
 
     def draw(self, window):
-        window.blit(self.images[self.currentImage], (self.pos.i2))
+        if self.facingLeft:
+            window.blit(self.leftImages[self.currentImage], (self.pos.i2))
+        else:
+            window.blit(self.images[self.currentImage], (self.pos.i2))
         #self.colliderCuboid.drawPygame(window, False, False)
         #self.currentImage = (self.currentImage + 1) % self.numOfImages
 
@@ -74,8 +81,8 @@ class baseObject():
         self.pos = new_center - Vector2(self.halfWidth, self.halfHeight)
 
 class Fish(baseObject):
-    def __init__(self, pos, vel, *images):
-        super().__init__(pos, vel, *images)
+    def __init__(self, pos, vel, images, left_images):
+        super().__init__(pos, vel, images, left_images)
         pass
 
     def catch(self, boatPos):
@@ -85,7 +92,7 @@ class Fish(baseObject):
 
 
 class Treasure(baseObject):
-    def __init__(self, pos, vel, imageName):
+    def __init__(self, pos, vel, imageName, leftImageName):
         super().__init__(pos, vel, imageName)
         pass
 
@@ -94,3 +101,4 @@ class Bob(baseObject):
         super().__init__(pos, vel, *images)
         for i in range(len(self.images)):
             self.images[i] = pygame.transform.rotozoom(self.images[i],0,  0.15)
+            self.leftImages[i] = pygame.transform.rotozoom(self.leftImages[i], 0, 0.15)
