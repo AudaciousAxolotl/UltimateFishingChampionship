@@ -7,9 +7,15 @@ screen_width = 1280
 screen_height = 720
 
 class baseObject():
-    def __init__(self, pos, vel, images, left_images):
+    def __init__(self, pos, vel, images, left_images, offset_vec):
         self.pos = pos
+        self.startPos = pos
         self.vel = vel
+        self.offset = Vector2(0, offset_vec.x)
+        self.pos += self.offset
+        self.offsetVel = Vector2(0, offset_vec.y)
+        self.readyToFlyIn = False
+        self.readyToFlutter = False
         self.facingLeft = False
         self.images = []
         self.leftImages = []
@@ -30,22 +36,28 @@ class baseObject():
         self.colliderCuboid = object.QuickAndDirtyCollisionRect(self.pos, self.width, self.height)
 
     def update(self, deltaTime):
-        if not self.isCaught:
-            self.pos[0] += self.vel[0] * deltaTime
-            self.pos[1] += self.vel[1] * deltaTime
-            self.animationCount += deltaTime
-            if self.animationCount >= self.animTimer:
-                self.currentImage = (self.currentImage + 1) % self.numOfImages
-                self.animationCount = 0
+        if self.readyToFlutter:
+            if not self.isCaught:
+                self.pos += self.vel * deltaTime
+                self.animationCount += deltaTime
+                if self.animationCount >= self.animTimer:
+                    self.currentImage = (self.currentImage + 1) % self.numOfImages
+                    self.animationCount = 0
 
-            if self.pos.x < 0 or self.pos.x > screen_width - self.width:
-                self.vel.x *= -1
-                self.facingLeft = not self.facingLeft
+                if self.pos.x < 0 or self.pos.x > screen_width - self.width:
+                    self.vel.x *= -1
+                    self.facingLeft = not self.facingLeft
 
-            if self.pos.y < 0 or self.pos.y > screen_height - self.height:
-                self.vel.y *= -1
+                if self.pos.y < 0 or self.pos.y > screen_height - self.height:
+                    self.vel.y *= -1
 
-            self.colliderCuboid.set_pos(self.pos)
+                self.colliderCuboid.set_pos(self.pos)
+        elif self.readyToFlyIn:
+            self.pos += self.offsetVel * deltaTime
+            if self.pos.y < self.startPos.y:
+                self.pos = self.startPos
+                self.readyToFlutter = True
+
 
     def draw(self, window):
         if self.facingLeft:
@@ -60,6 +72,9 @@ class baseObject():
 
     def add_force(self, forceVec):
         pass
+
+    def fly_in(self):
+        self.readyToFlyIn = True
 
     # def __del__(self):
     #     print("die")
@@ -81,8 +96,8 @@ class baseObject():
         self.pos = new_center - Vector2(self.halfWidth, self.halfHeight)
 
 class Fish(baseObject):
-    def __init__(self, pos, vel, images, left_images):
-        super().__init__(pos, vel, images, left_images)
+    def __init__(self, pos, vel, images, left_images, offset_vector):
+        super().__init__(pos, vel, images, left_images, offset_vector)
         pass
 
     def catch(self, boatPos):
@@ -90,15 +105,11 @@ class Fish(baseObject):
         self.vel = self.vel.normalized * 600
         self.isCaught = True
 
-
-class Treasure(baseObject):
-    def __init__(self, pos, vel, imageName, leftImageName):
-        super().__init__(pos, vel, imageName)
-        pass
-
 class Bob(baseObject):
-    def __init__(self, pos, vel, *images):
-        super().__init__(pos, vel, *images)
+    def __init__(self, pos, vel, left_images, right_images, offset_vec = Vector2(0, 0)):
+        super().__init__(pos, vel, left_images, right_images, offset_vec)
+        self.readyToFlyIn = False
+        self.readyToFlutter = True
         for i in range(len(self.images)):
             self.images[i] = pygame.transform.rotozoom(self.images[i],0,  0.15)
             self.leftImages[i] = pygame.transform.rotozoom(self.leftImages[i], 0, 0.15)

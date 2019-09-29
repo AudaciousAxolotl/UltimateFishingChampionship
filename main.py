@@ -91,8 +91,8 @@ myFishList = []
 caughtFishList = []
 for i in range(10):
     myFish = FishObjects.Fish(Vector2(random.randint(100, 1180), random.randint(100, 620)),
-                              Vector2(random.randint(-50, -20), random.randint(-20, 20)),
-                              fishPics[i % 7], fishLeftPics[i % 7])
+                              Vector2(random.choice((-1, 1)) * random.randint(40, 80), random.choice((-1, 1)) * random.randint(30, 65)),
+                              fishPics[i % 7], fishLeftPics[i % 7], Vector2(random.randint(1200,2400), random.randint(-250, -150)))
     myFishList.append(myFish)
 
 
@@ -267,6 +267,8 @@ while not done:
                     if joystick is None:
                         myBoatman.cast_line()
                         gameStarted = True
+                        for fish in myFishList:
+                            fish.fly_in()
 
             if evt.type == pygame.JOYBUTTONDOWN:
                 if evt.button == 0:
