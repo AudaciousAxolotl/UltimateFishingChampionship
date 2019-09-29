@@ -23,8 +23,7 @@ class baseObject():
         self.isDead = False
         self.animTimer = 0.2
         self.animationCount = 0
-        self.colliderCuboid = object.Cuboid((255,0,255), self.pos + Vector2(self.halfWidth, self.halfHeight), (self.width, self.height))
-        self.colliderCuboid.rotate(90)
+        self.colliderCuboid = object.QuickAndDirtyCollisionRect(self.pos, self.width, self.height)
 
     def update(self, deltaTime):
         if not self.isCaught:
@@ -42,8 +41,7 @@ class baseObject():
             if self.pos.y < 0 or self.pos.y > screen_height - self.height:
                 self.vel.y *= -1
 
-
-            self.colliderCuboid.updatePos(self.pos + Vector2(self.halfWidth, self.halfHeight))
+            self.colliderCuboid.set_pos(self.pos)
 
     def draw(self, window):
         window.blit(self.images[self.currentImage], (self.pos.i2))
@@ -59,6 +57,21 @@ class baseObject():
     # def __del__(self):
     #     print("die")
 
+    @property
+    def x(self):
+        return self.pos.x
+
+    @property
+    def y(self):
+        return self.pos.y
+
+    @property
+    def center_pos(self):
+        return self.pos + Vector2(self.halfWidth, self.halfHeight)
+
+    @center_pos.setter
+    def center_pos(self, new_center):
+        self.pos = new_center - Vector2(self.halfWidth, self.halfHeight)
 
 class Fish(baseObject):
     def __init__(self, pos, vel, *images):

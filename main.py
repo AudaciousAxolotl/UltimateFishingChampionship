@@ -1,4 +1,5 @@
 import pygame, time, random, Boatman, FishObjects, itertools
+from copy import deepcopy
 from vector import *
 from bg import *
 from star import *
@@ -19,6 +20,9 @@ joystick = None
 joystickTriggerDown = False
 joystickTriggerDownEvent = False
 joystickTriggerUpEvent = False
+pauseUpdates = False
+updatePauseTime = 0.35
+updatePauseTimer = 0
 leftRightAxis = 0
 upDownAxis = 0
 castVectorAxis = Vector2(0, 0)
@@ -31,13 +35,21 @@ starfieldMoveUp = 0
 offset = itertools.repeat((0,0))
 shakeScreen = screen.copy()
 
-def shake():
+tintColor = (25,25,25)
+tintAlpha = 200
+
+fullScreenTintOverlay = screen.copy()
+fullScreenTintOverlay.fill(tintColor)
+fullScreenTintOverlay.set_alpha(tintAlpha)
+
+
+def shake(multiplier):
     s = -1
-    for _ in range(0, 3):
-        for x in range(0, 20, 5):
-            yield (x*s, 0)
-        for x in range(20, 0, 5):
-            yield (x*s, 0)
+    for _ in range(0, int(3*multiplier)):
+        for x in range(0, int(20*multiplier), int(5*multiplier)):
+            yield (random.choice(((x*s, 0), (0, x*s))))
+        for x in range(int(20*multiplier), 0, int(5*multiplier)):
+            yield (random.choice(((x*s, 0), (0, x*s))))
         s *= -1
     while True:
         yield (0, 0)
@@ -68,6 +80,7 @@ fishPics =[("Boot_1.png", "Boot_2.png"),
 
 myBoatman = Boatman.Boatman()
 myFishList = []
+caughtFishList = []
 for i in range(10):
     myFish = FishObjects.Fish(Vector2(random.randint(100, 1180), random.randint(100, 620)),
                               Vector2(random.randint(-50, -20), random.randint(-20, 20)), *fishPics[i%7])
@@ -127,7 +140,10 @@ while introSequence:
 
     title1 = pygame.font.Font.render(stardewFont, "Ultimate Fishing", True, (255, 255, 255))
     title2 = pygame.font.Font.render(stardewFont, "Championship", True, (255, 255, 255))
-    instructions1 = pygame.font.Font.render(stardewFont, "RT to", True, (255, 255, 255))
+    control_string = "RT to"
+    if joystick is None:
+        control_string = "Left click to"
+    instructions1 = pygame.font.Font.render(stardewFont, control_string, True, (255, 255, 255))
     instructions2 = pygame.font.Font.render(stardewFont, "catch fish", True, (255, 255, 255))
 
     if runningTime < 10.0:
@@ -174,33 +190,40 @@ while not done:
     #################################
     deltaTime = clock.tick(60) / 1000.0
     screenMoveUp -= 7
-    starfieldMoveUp -= 20
     for star in starsArray:
         star.move()
 
-    if starfieldMoveUp < -1620:
-        starfieldMoveUp = 0
+    if pauseUpdates:
+        updatePauseTimer -= deltaTime
+        if updatePauseTimer < 0:
+            pauseUpdates = False
+            updatePauseTimer = 0
 
-    for fish in myFishList:
-        fish.update(deltaTime)
-
-    myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
-    myBoatman.update(deltaTime)
-
-    if not myBoatman.mCaughtSomething:
+    if not pauseUpdates:
         for fish in myFishList:
-            if fish.isCaught:
-                fish.die()
-            else:
-                fish.isCaught = myBoatman.checkBobberCollision(fish.colliderCuboid)
+            fish.update(deltaTime)
+
+        myBoatman.add_force(Vector2(leftRightAxis * myBoatman.mMoveSpeed, upDownAxis * myBoatman.mMoveSpeed))
+        myBoatman.update(deltaTime)
+
+        if not myBoatman.mCaughtSomething:
+            for fish in myFishList:
                 if fish.isCaught:
-                    break
-    else:
-        for fish in myFishList:
-            if fish.isCaught:
-                fish.pos=myBoatman.mCurrentBobberLocation
+                    fish.die()
+                    offset = shake(1.0)
+                    #TODO: play item/fish caught sound
+                else:
+                    fish.isCaught = myBoatman.checkBobberCollision(fish.colliderCuboid)
+                    if fish.isCaught:
+                        pauseUpdates = True
+                        updatePauseTimer = updatePauseTime
+                        break
+        else:
+            for fish in myFishList:
+                if fish.isCaught:
+                    fish.center_pos = myBoatman.bobber_location
 
-    myFishList[:] = [fish for fish in myFishList if not fish.isDead]
+        myFishList[:] = [fish for fish in myFishList if not fish.isDead]
 
 
 
@@ -213,45 +236,42 @@ while not done:
 
     if joystick is None:
         (mouse_x, mouse_y) = pygame.mouse.get_pos()
-        myBoatman.set_target_reticle(Vector2(mouse_x, mouse_y))
+        if not pauseUpdates:
+            myBoatman.set_target_reticle(Vector2(mouse_x, mouse_y))
 
     for evt in pygame.event.get():
         if evt.type == pygame.QUIT:
             done = True
-        if evt.type == pygame.KEYDOWN:
-            if evt.key == pygame.K_ESCAPE:
-                done = True
-            if evt.key == pygame.K_F6:
-                debugIsOn = not debugIsOn
+        if not pauseUpdates:
+            if evt.type == pygame.KEYDOWN:
+                if evt.key == pygame.K_ESCAPE:
+                    done = True
+                if evt.key == pygame.K_F6:
+                    debugIsOn = not debugIsOn
 
-        if evt.type == pygame.MOUSEBUTTONDOWN:
-            if evt.button == 1:
-                if joystick is None:
-                    myBoatman.cast_line()
+            if evt.type == pygame.MOUSEBUTTONDOWN:
+                if evt.button == 1:
+                    if joystick is None:
+                        myBoatman.cast_line()
 
-        if evt.type == pygame.JOYBUTTONDOWN:
-            if evt.button == 0:
-                if debugIsOn:
-                    print("A?")
-            elif evt.button == 2:
-                """ X Button """
-                if debugIsOn:
-                    print("X!")
-            elif evt.button == 3:
-                if debugIsOn:
-                    print("Y!")
-            elif evt.button == 6:
-                done = True
-            elif evt.button == 7:
-                debugIsOn = not debugIsOn
-            else:
-                if debugIsOn:
-                    print("Joystick button pressed: ", str(evt.button))
-    #            if evt.button == 5:
-    #                """ Right Bumper """
-
-    #            if evt.button == 4:
-    #                """ Left Bumper """
+            if evt.type == pygame.JOYBUTTONDOWN:
+                if evt.button == 0:
+                    if debugIsOn:
+                        print("A?")
+                elif evt.button == 2:
+                    """ X Button """
+                    if debugIsOn:
+                        print("X!")
+                elif evt.button == 3:
+                    if debugIsOn:
+                        print("Y!")
+                elif evt.button == 6:
+                    done = True
+                elif evt.button == 7:
+                    debugIsOn = not debugIsOn
+                else:
+                    if debugIsOn:
+                        print("Joystick button pressed: ", str(evt.button))
 
     if joystick is not None:
         leftRightAxis = joystick.get_axis(0)
@@ -261,60 +281,64 @@ while not done:
 
     key_pressed = pygame.key.get_pressed()
 
-    if key_pressed[pygame.K_j]:
-        offset = shake()
+    if not pauseUpdates:
+        if key_pressed[pygame.K_j]:
+            offset = shake(1.0)
 
-    if joystickTriggerDown:
-        if abs(triggerAxis) < 0.5:
-            joystickTriggerDown = False
-            joystickTriggerUpEvent = True
-            if debugIsOn:
-                print("Trigger up!")
-    else:
-        if abs(triggerAxis) > 0.7:
-            joystickTriggerDown = True
-            joystickTriggerDownEvent = True
-            if debugIsOn:
-                print("Trigger down!")
+        if key_pressed[pygame.K_k]:
+            offset = shake(2.3)
 
-    if joystick is None:
-        if key_pressed[pygame.K_w]:
-            upDownAxis = -0.6
+        if joystickTriggerDown:
+            if abs(triggerAxis) < 0.5:
+                joystickTriggerDown = False
+                joystickTriggerUpEvent = True
+                if debugIsOn:
+                    print("Trigger up!")
         else:
-            if key_pressed[pygame.K_s]:
-                upDownAxis = 0.6
+            if abs(triggerAxis) > 0.7:
+                joystickTriggerDown = True
+                joystickTriggerDownEvent = True
+                if debugIsOn:
+                    print("Trigger down!")
+
+        if joystick is None:
+            if key_pressed[pygame.K_w]:
+                upDownAxis = -0.6
             else:
-                upDownAxis = 0
+                if key_pressed[pygame.K_s]:
+                    upDownAxis = 0.6
+                else:
+                    upDownAxis = 0
 
-        if key_pressed[pygame.K_a]:
-            leftRightAxis = -0.6
-        else:
-            if key_pressed[pygame.K_d]:
-                leftRightAxis = 0.6
+            if key_pressed[pygame.K_a]:
+                leftRightAxis = -0.6
             else:
-                leftRightAxis = 0
+                if key_pressed[pygame.K_d]:
+                    leftRightAxis = 0.6
+                else:
+                    leftRightAxis = 0
 
-    if abs(leftRightAxis) < deadZoneThreshold:
-        leftRightAxis = 0
+        if abs(leftRightAxis) < deadZoneThreshold:
+            leftRightAxis = 0
 
-    if abs(upDownAxis) < deadZoneThreshold:
-        upDownAxis = 0
+        if abs(upDownAxis) < deadZoneThreshold:
+            upDownAxis = 0
 
-    if abs(castVectorAxis.x) < deadZoneThreshold:
-        castVectorAxis.x = 0
+        if abs(castVectorAxis.x) < deadZoneThreshold:
+            castVectorAxis.x = 0
 
-    if abs(castVectorAxis.y) < deadZoneThreshold:
-        castVectorAxis.y = 0
+        if abs(castVectorAxis.y) < deadZoneThreshold:
+            castVectorAxis.y = 0
 
-    if joystickTriggerDownEvent:
-        myBoatman.cast_line()
-        joystickTriggerDownEvent = False
+        if joystickTriggerDownEvent:
+            myBoatman.cast_line()
+            joystickTriggerDownEvent = False
 
-    if joystickTriggerUpEvent:
-        joystickTriggerUpEvent = False
+        if joystickTriggerUpEvent:
+            joystickTriggerUpEvent = False
 
-    if joystick is not None:
-        myBoatman.move_target_reticle(castVectorAxis)
+        if joystick is not None:
+            myBoatman.move_target_reticle(castVectorAxis)
 
 
     #################################
@@ -332,7 +356,11 @@ while not done:
     for fish in myFishList:
         fish.draw(shakeScreen)
 
-
+    if pauseUpdates:
+        shakeScreen.blit(fullScreenTintOverlay, (0,0))
+        myBoatman.draw(shakeScreen)
+        caughtFishList[:] = [fish for fish in myFishList if fish.isCaught]
+        caughtFishList[0].draw(shakeScreen)
 
     screen.blit(shakeScreen, next(offset))
     pygame.display.flip()
